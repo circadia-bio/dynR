@@ -21,17 +21,21 @@ data(ts)
 
 ## Overview
 
-Phase-based dynFC methods characterise functional connectivity through the
-**instantaneous phase** of the BOLD signal. Rather than asking how *correlated*
+Phase-based dynFC methods characterise connectivity through the
+**instantaneous phase** of the signal. Rather than asking how *correlated*
 two regions are over a window, they ask: are two regions **synchronised** at
 this exact moment — oscillating in phase, or in anti-phase?
 
 This perspective originates in the physics of coupled oscillators. Each
-parcel's BOLD timeseries, once bandpass-filtered to a specific frequency band,
+channel's timeseries, once bandpass-filtered to a frequency band of interest,
 behaves like a noisy oscillator. The Hilbert transform extracts the
-instantaneous phase of that oscillation at every timepoint. Two parcels are
+instantaneous phase of that oscillation at every timepoint. Two channels are
 phase-locked when their phases move together; they are in anti-phase synchrony
 when their phases are consistently offset by π radians.
+
+Although this vignette uses BOLD fMRI data and refers to parcels and TR
+throughout, the same methods apply to any band-limited neurophysiological
+signal — including EEG narrow-band epochs, LFP, and MEG.
 
 `dynR` implements three phase-based methods:
 

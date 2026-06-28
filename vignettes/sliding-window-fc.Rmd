@@ -36,6 +36,10 @@ series — no windowing required.
 | `cofluct()` | Edge time series \[n\_edges × Tmax\] + RSS | Edge-centric cofluctuation |
 | `corr_corr()` | FC recurrence matrix \[Tmax × Tmax\] | Hansen et al. (2015) |
 
+Although this vignette uses BOLD fMRI data throughout, these methods apply
+to any multivariate timeseries where pairwise correlations carry meaningful
+information, including EEG and LFP.
+
 ---
 
 ## Sliding-window correlation

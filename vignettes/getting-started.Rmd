@@ -30,8 +30,8 @@ seriously. It asks: does the pattern of co-activation between brain regions
 shift during a scan, and can those shifts tell us something about cognition,
 clinical state, or neural mechanisms?
 
-`dynR` computes dynFC representations from preprocessed BOLD timeseries,
-implementing two complementary families of methods:
+`dynR` computes dynFC representations from preprocessed multivariate
+timeseries, implementing two complementary families of methods:
 
 | Family | Core functions | What it captures |
 |---|---|---|
@@ -66,10 +66,12 @@ behavioural events.
 
 ## Package data
 
-`dynR` ships with a resting-state BOLD timeseries from the
+`dynR` ships with a resting-state BOLD fMRI timeseries from the
 [edge-ts](https://github.com/brain-networks/edge-ts) repository
 (Faskowitz et al., 2020), parcellated into 200 regions of interest. This
-dataset is used throughout all three vignettes.
+dataset is used throughout all three vignettes. The methods themselves are
+not restricted to fMRI — they apply equally to EEG, LFP, or any
+band-limited neurophysiological signal.
 
 ```{r load-data}
 data(ts)   # [200 × 600] BOLD timeseries

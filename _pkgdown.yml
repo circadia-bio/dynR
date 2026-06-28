@@ -1,4 +1,4 @@
-url: https://CoDe-Neuro.github.io/dynR
+url: https://dynr.circadia-lab.uk
 
 template:
   bootstrap: 5
@@ -115,15 +115,19 @@ template:
 logo: man/figures/logo.svg
 
 home:
-  title: "dynR — Dynamic Functional Connectivity for R"
+  title: "dynR — Dynamic Connectivity for Neurophysiological Timeseries"
   description: >
-    An R package for dynamic functional connectivity analysis of BOLD fMRI
-    timeseries. Implements sliding-window correlations, edge-centric
-    cofluctuations, instantaneous phase-locking, LEiDA, and the Kuramoto
-    order parameter. Part of the CoDe-Neuro Lab R ecosystem.
+    An R port of the Python dynfc library for computing dynamic connectivity
+    representations from multivariate neurophysiological timeseries, including
+    BOLD fMRI, EEG, LFP, and related signals. Implements sliding-window
+    correlations, edge-centric cofluctuations, instantaneous phase-locking,
+    LEiDA, and the Kuramoto order parameter. Part of the Circadia Lab
+    R ecosystem.
   links:
-  - text: CoDe-Neuro Lab
-    href: https://github.com/CoDe-Neuro
+  - text: Circadia Lab
+    href: https://github.com/circadia-bio
+  - text: Python dynfc
+    href: https://github.com/LucasFranca/dynfc
   sidebar:
     structure: [links, license, community, citation, authors, dev]
 
@@ -146,7 +150,7 @@ navbar:
           href: articles/sliding-window-fc.html
     github:
       icon: fab fa-github
-      href: https://github.com/CoDe-Neuro/dynR
+      href: https://github.com/circadia-bio/dynR
       aria-label: GitHub
 
 articles:
@@ -192,6 +196,8 @@ reference:
 authors:
   Lucas França:
     href: https://orcid.org/0000-0003-0853-1319
+  Mario Leocadio-Miguel:
+    href: https://orcid.org/0000-0002-7248-3529
   Dafnis Batallé:
     href: https://orcid.org/0000-0003-2097-979X
 
@@ -201,6 +207,6 @@ footer:
     right: [built_with]
   components:
     package: >
-      **dynR** — CoDe-Neuro Lab.
+      **dynR** — Circadia Lab.
     developed_by: >
-      Lucas França & Dafnis Batallé.
+      Lucas França, Mario Leocadio-Miguel & Dafnis Batallé.
