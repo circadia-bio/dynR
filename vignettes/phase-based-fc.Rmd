@@ -141,22 +141,11 @@ patterns. K-means is the standard choice (Cabral et al., 2017; Lord et al.,
 
 ### Choosing K
 
-There is no universal rule for K. In practice:
-
-- **K = 2–3** captures coarse global organisation (e.g. default mode vs.
-  task-positive network).
-- **K = 5–10** resolves finer network-level distinctions commonly seen in
-  resting-state data.
-- **K > 15** risks overfitting to session-specific noise without adding
-  interpretable new states.
-
-A common approach is to sweep over a range of K values, compute a stability
-metric (silhouette coefficient or variance explained), and select the K at
-which additional states no longer yield coherent new patterns. For a
-single scan, **K = 5** is a reasonable starting point.
-
-The `nstart` argument is critical: K-means is sensitive to initialisation,
-so running many random restarts and keeping the best solution is essential.
+There is no universal rule for K. Typical choices in resting-state research
+range from 2–3 (coarse global organisation) to 5–10 (finer network
+distinctions). The `nstart` argument is critical — K-means is sensitive to
+initialisation, so running many random restarts and keeping the best solution
+is essential.
 
 ```{r leida-kmeans}
 set.seed(42)
