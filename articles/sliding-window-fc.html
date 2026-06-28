@@ -156,8 +156,8 @@
 connectivity evolves over time by either <strong>windowing</strong> the
 timeseries into short segments and computing Pearson correlations within
 each window, or by analysing the <strong>instantaneous
-co-activation</strong> of parcel pairs as a continuous edge time
-series.</p>
+co-activation</strong> of parcel pairs as a continuous edge time series
+— no windowing required.</p>
 <p><code>dynR</code> implements three correlation-based functions:</p>
 <table class="table">
 <colgroup>
@@ -187,7 +187,7 @@ series.</p>
 </tr>
 <tr class="odd">
 <td><code><a href="../reference/corr_corr.html">corr_corr()</a></code></td>
-<td>Correlation-of-correlations
+<td>FC recurrence matrix
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mi>m</mi><mi>a</mi><mi>x</mi><mo>×</mo><mi>T</mi><mi>m</mi><mi>a</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">Tmax × Tmax</annotation></semantics></math>
 </td>
 <td>Hansen et al. (2015)</td>
@@ -199,27 +199,56 @@ series.</p>
 <div class="section level2">
 <h2 id="sliding-window-correlation">Sliding-window correlation<a class="anchor" aria-label="anchor" href="#sliding-window-correlation"></a>
 </h2>
-<p><code><a href="../reference/corr_slide.html">corr_slide()</a></code> divides the timeseries into overlapping or
-non-overlapping windows and computes the Pearson FC matrix within each
-one. The choice of window length is a key parameter: too short and the
-estimate is noisy; too long and rapid transitions are blurred.</p>
+<div class="section level3">
+<h3 id="window-length-a-critical-choice">Window length: a critical choice<a class="anchor" aria-label="anchor" href="#window-length-a-critical-choice"></a>
+</h3>
+<p>Unlike phase-based methods, sliding-window FC requires you to commit
+to a window length. The trade-off is fundamental:</p>
+<ul>
+<li>
+<strong>Short windows</strong> (&lt; 30 TRs): high temporal
+resolution, but FC estimates are noisy — reliable Pearson correlations
+require sufficient timepoints relative to the number of parcels.</li>
+<li>
+<strong>Long windows</strong> (&gt; 60 TRs): stable, low-noise FC
+estimates, but rapid state transitions are averaged away.</li>
+<li>
+<strong>Typical choice</strong>: <strong>30–60 TRs</strong> (60–120
+s for TR = 2 s), with step size of 1 TR for fine temporal resolution or
+larger steps for efficiency (Hutchison et al., 2013; Leonardi &amp; Van
+De Ville, 2015).</li>
+</ul>
+<p>For this dataset (TR = 2 s, 600 timepoints), a few window choices
+look like:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 30-timepoint windows, step of 5 (overlapping)</span></span>
-<span><span class="va">sw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/corr_slide.html">corr_slide</a></span><span class="op">(</span><span class="va">ts</span>, window <span class="op">=</span> <span class="fl">30</span>, step <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Window size: 30 timepoints\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Window size: 30 timepoints</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Step:        5 timepoints\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Step:        5 timepoints</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"N windows:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; N windows:   115</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">TRs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">30</span>, <span class="fl">45</span>, <span class="fl">60</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  `Window (TRs)` <span class="op">=</span> <span class="va">TRs</span>,</span>
+<span>  `Duration (s)` <span class="op">=</span> <span class="va">TRs</span> <span class="op">*</span> <span class="fl">2</span>,</span>
+<span>  `N windows (step = 5)` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="op">(</span><span class="fl">600</span> <span class="op">-</span> <span class="va">TRs</span><span class="op">)</span> <span class="op">/</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1L</span>,</span>
+<span>  check.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Window (TRs) Duration (s) N windows (step = 5)</span></span>
+<span><span class="co">#&gt; 1           20           40                  117</span></span>
+<span><span class="co">#&gt; 2           30           60                  115</span></span>
+<span><span class="co">#&gt; 3           45           90                  112</span></span>
+<span><span class="co">#&gt; 4           60          120                  109</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/corr_slide.html">corr_slide</a></span><span class="op">(</span><span class="va">ts</span>, window <span class="op">=</span> <span class="fl">30</span>, step <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Window:    30 TRs (60 s at TR = 2 s)\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Window:    30 TRs (60 s at TR = 2 s)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Step:       5 TRs (10 s)\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Step:       5 TRs (10 s)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"N windows:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; N windows: 115</span></span></code></pre></div>
+</div>
 <div class="section level3">
 <h3 id="validating-against-static-fc">Validating against static FC<a class="anchor" aria-label="anchor" href="#validating-against-static-fc"></a>
 </h3>
-<p>When <code>window = ncol(ts)</code> the single window is the full
-timeseries, so the result must equal the static FC matrix.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">full</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/corr_slide.html">corr_slide</a></span><span class="op">(</span><span class="va">ts</span>, window <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span><span class="op">)</span></span>
+<p>A single window spanning the full timeseries must recover the static
+FC matrix exactly.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">full</span>     <span class="op">&lt;-</span> <span class="fu"><a href="../reference/corr_slide.html">corr_slide</a></span><span class="op">(</span><span class="va">ts</span>, window <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">max_diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">full</span><span class="op">$</span><span class="va">corr_mats</span><span class="op">[</span>, , <span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="va">fc</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max deviation from static FC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/formatc.html" class="external-link">formatC</a></span><span class="op">(</span><span class="va">max_diff</span>, format <span class="op">=</span> <span class="st">"e"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Max deviation from static FC: 8.8818e-16</span></span></code></pre></div>
@@ -227,21 +256,27 @@ timeseries, so the result must equal the static FC matrix.</p>
 <div class="section level3">
 <h3 id="fc-variability-across-windows">FC variability across windows<a class="anchor" aria-label="anchor" href="#fc-variability-across-windows"></a>
 </h3>
-<p>A useful summary is how much the inter-parcel correlations vary
-across windows. High variability means the connectivity structure is
-genuinely non-stationary.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Upper triangle indices (excluding diagonal)</span></span>
-<span><span class="va">n_parcels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
-<span><span class="va">ut</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">n_parcels</span><span class="op">)</span><span class="op">)</span>, arr.ind <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Extract upper triangle for each window → [n_edges x n_windows] matrix</span></span>
+<p>The standard deviation of each edge across windows — its <em>FC
+variability</em> — reveals which connections drive the dynamic signal.
+Edges with high variability are the ones that genuinely fluctuate; edges
+with near-zero variability are essentially static.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_parcels</span>      <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">ut</span>             <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">n_parcels</span><span class="op">)</span><span class="op">)</span>, arr.ind <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">edge_by_window</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span>, <span class="fl">3</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="va">m</span><span class="op">[</span><span class="va">ut</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">edge_sd</span>        <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">edge_by_window</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Mean standard deviation across edges</span></span>
-<span><span class="va">mean_sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">edge_by_window</span>, <span class="fl">1</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Mean edge SD across windows:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">mean_sd</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Mean edge SD across windows: 0.5091</span></span></code></pre></div>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>sd <span class="op">=</span> <span class="va">edge_sd</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">sd</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_histogram</span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">60</span>, fill <span class="op">=</span> <span class="st">"#8D9FD7"</span>, colour <span class="op">=</span> <span class="st">"#341C5D"</span>,</span>
+<span>                 linewidth <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">edge_sd</span><span class="op">)</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"#9E3C30"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"SD across windows"</span>, y <span class="op">=</span> <span class="st">"Number of edges"</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"FC variability distribution"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Mean edge SD = "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">edge_sd</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>panel.grid.minor <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="sliding-window-fc_files/figure-html/sw-variability-1.png" class="r-plt" alt="" width="672"></p>
 <hr>
 </div>
 </div>
@@ -249,105 +284,141 @@ genuinely non-stationary.</p>
 <h2 id="edge-centric-cofluctuations">Edge-centric cofluctuations<a class="anchor" aria-label="anchor" href="#edge-centric-cofluctuations"></a>
 </h2>
 <p>The edge-centric framework (Esfahlani et al., 2020; Faskowitz et al.,
-2020) does not window the data at all. Instead, it z-scores each
-parcel’s timeseries and computes the element-wise product for every
-unique parcel pair:</p>
+2020) abandons the window entirely. Instead, each parcel’s timeseries is
+z-standardised and the element-wise product of every unique parcel pair
+is computed at every timepoint:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mtext mathvariant="normal">ets</mtext><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>z</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>⋅</mo><msub><mi>z</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\text{ets}_{ij}(t) = z_i(t) \cdot z_j(t)</annotation></semantics></math></p>
 <p>The result is an <strong>edge time series</strong> — a continuous,
 frame-by-frame estimate of co-activation for every pair.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cofluct.html">cofluct</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span></span>
-<span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ec</span>      <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cofluct.html">cofluct</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span></span>
 <span><span class="va">n_edges</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">edge_ts</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Edges (N*(N-1)/2):"</span>, <span class="va">n_edges</span>, <span class="st">"\n"</span><span class="op">)</span>   <span class="co"># 200*199/2 = 19900</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Edges (N*(N-1)/2):"</span>, <span class="va">n_edges</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Edges (N*(N-1)/2): 19900</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Timepoints:       "</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">edge_ts</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Timepoints:        600</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="root-sum-square-rss-cofluctuation">Root-sum-square (RSS) cofluctuation<a class="anchor" aria-label="anchor" href="#root-sum-square-rss-cofluctuation"></a>
 </h3>
-<p>The RSS vector summarises the total cofluctuation amplitude at each
-timepoint:</p>
+<p>The RSS vector summarises the total co-activation amplitude across
+all edges at each timepoint:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">RSS</mtext><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msqrt><mrow><munder><mo>∑</mo><mrow><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false" form="postfix">)</mo></mrow></munder><msub><mtext mathvariant="normal">ets</mtext><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">\text{RSS}(t) = \sqrt{\sum_{(i,j)} \text{ets}_{ij}(t)^2}</annotation></semantics></math></p>
-<p>High-RSS frames are moments of unusually strong co-activation across
-the brain and have been shown to drive the structure of the static FC
-matrix (Esfahlani et al., 2020).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="st">"#1B6799"</span>,</span>
-<span>     xlab <span class="op">=</span> <span class="st">"Timepoint"</span>, ylab <span class="op">=</span> <span class="st">"RSS"</span>,</span>
-<span>     main <span class="op">=</span> <span class="st">"Root-sum-square cofluctuation"</span>,</span>
-<span>     lwd <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span>,</span>
-<span>       col <span class="op">=</span> <span class="st">"#FC544A"</span>, lty <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, legend <span class="op">=</span> <span class="st">"Mean + 2 SD"</span>,</span>
-<span>       col <span class="op">=</span> <span class="st">"#FC544A"</span>, lty <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="sliding-window-fc_files/figure-html/rss-plot-1.png" class="r-plt" alt="" width="672"></p>
-</div>
-<div class="section level3">
-<h3 id="high-amplitude-events">High-amplitude events<a class="anchor" aria-label="anchor" href="#high-amplitude-events"></a>
-</h3>
-<p>Frames with RSS above mean + 2 SD are candidate
-<strong>high-amplitude cofluctuation events</strong> — the moments that
-most strongly shape static FC.</p>
+<p>High-RSS frames are moments of unusually strong, synchronised
+co-activation across the whole brain. These <strong>high-amplitude
+events</strong> have been shown to disproportionately drive the
+structure of the static FC matrix — a small fraction of timepoints
+accounts for most of the long-run average connectivity (Esfahlani et
+al., 2020).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">threshold</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span></span>
-<span><span class="va">high_frames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span> <span class="op">&gt;</span> <span class="va">threshold</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"High-amplitude frames (RSS &gt; mean + 2SD):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">high_frames</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; High-amplitude frames (RSS &gt; mean + 2SD): 20</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Proportion of scan:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">high_frames</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Proportion of scan: 0.033</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">thr</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span></span>
+<span><span class="va">df_rss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span>, rss <span class="op">=</span> <span class="va">ec</span><span class="op">$</span><span class="va">rss</span>,</span>
+<span>                     high <span class="op">=</span> <span class="va">ec</span><span class="op">$</span><span class="va">rss</span> <span class="op">&gt;</span> <span class="va">thr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_rss</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">rss</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#8D9FD7"</span>, linewidth <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="va">thr</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"#9E3C30"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">annotate</span><span class="op">(</span><span class="st">"text"</span>,</span>
+<span>           x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">df_rss</span><span class="op">$</span><span class="va">t</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.02</span>, y <span class="op">=</span> <span class="va">thr</span> <span class="op">+</span> <span class="fl">0.8</span>,</span>
+<span>           label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Mean + 2 SD  (n = "</span>,</span>
+<span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">df_rss</span><span class="op">$</span><span class="va">high</span><span class="op">)</span>, <span class="st">" frames)"</span><span class="op">)</span>,</span>
+<span>           colour <span class="op">=</span> <span class="st">"#9E3C30"</span>, size <span class="op">=</span> <span class="fl">3.5</span>, hjust <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Timepoint"</span>, y <span class="op">=</span> <span class="st">"RSS"</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Root-sum-square cofluctuation"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">df_rss</span><span class="op">$</span><span class="va">high</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                         <span class="st">"% of timepoints exceed threshold"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>panel.grid.minor <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="sliding-window-fc_files/figure-html/rss-plot-1.png" class="r-plt" alt="" width="672"></p>
 <hr>
 </div>
 </div>
 <div class="section level2">
 <h2 id="correlation-of-correlations">Correlation of correlations<a class="anchor" aria-label="anchor" href="#correlation-of-correlations"></a>
 </h2>
-<p><code><a href="../reference/corr_corr.html">corr_corr()</a></code> computes the full
+<p><code><a href="../reference/corr_corr.html">corr_corr()</a></code> computes a
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mi>m</mi><mi>a</mi><mi>x</mi><mo>×</mo><mi>T</mi><mi>m</mi><mi>a</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">Tmax × Tmax</annotation></semantics></math>
-matrix of pairwise correlations between edge time series (Hansen et al.,
-2015). Entry <em>(t1, t2)</em> reflects how similar the co-activation
-patterns were at timepoints <em>t1</em> and <em>t2</em> — a non-windowed
-measure of FC recurrence.</p>
+matrix of pairwise correlations between edge time series. Entry
+(<em>t</em>1, <em>t</em>2) answers: <strong>how similar was the brain’s
+whole-network co-activation pattern at timepoint <em>t</em>1 to that at
+<em>t</em>2?</strong></p>
+<p>This makes it a <strong>temporal recurrence matrix</strong> — a
+fingerprint of how often the brain revisits similar FC configurations.
+Key features to look for:</p>
+<ul>
+<li>
+<strong>Bright off-diagonal blocks</strong>: the brain revisiting
+similar co-activation states at different times.</li>
+<li>
+<strong>Diagonal block structure</strong>: sustained states that
+persist over consecutive timepoints.</li>
+<li>
+<strong>Sparse, diffuse structure</strong>: rapidly shifting,
+non-recurrent dynamics.</li>
+</ul>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/corr_corr.html">corr_corr</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cc</span><span class="op">)</span>   <span class="co"># [600 x 600]</span></span>
-<span><span class="co">#&gt; [1] 600 600</span></span></code></pre></div>
-<p>The matrix is symmetric by construction and has ones on the
-diagonal.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">cc</span><span class="op">)</span>, <span class="st">"×"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">cc</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Dimensions: 600 × 600</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Symmetric:   "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">cc</span>, <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">cc</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Symmetric:    TRUE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Diagonal == 1:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">cc</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">1e-10</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Diagonal == 1: TRUE</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">pal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html" class="external-link">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#341C5D"</span>, <span class="st">"#E8ECF8"</span>, <span class="st">"#9E3C30"</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">256</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/image.html" class="external-link">image</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">cc</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">cc</span><span class="op">)</span><span class="op">)</span>, <span class="va">cc</span>,</span>
+<span>      col  <span class="op">=</span> <span class="va">pal</span>,</span>
+<span>      xlab <span class="op">=</span> <span class="st">"Timepoint"</span>, ylab <span class="op">=</span> <span class="st">"Timepoint"</span>,</span>
+<span>      main <span class="op">=</span> <span class="st">"FC recurrence (correlation of correlations)"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="sliding-window-fc_files/figure-html/cc-plot-1.png" class="r-plt" alt="" width="528"></p>
+<p>Warm colours indicate timepoints where the brain was in similar
+connectivity configurations; cool colours indicate dissimilar states.
+Visible block structure along the diagonal suggests sustained, recurring
+FC patterns.</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="preparing-for-brain-state-analysis">Preparing for brain state analysis<a class="anchor" aria-label="anchor" href="#preparing-for-brain-state-analysis"></a>
+<h2 id="brain-state-analysis-from-sliding-window-fc">Brain state analysis from sliding-window FC<a class="anchor" aria-label="anchor" href="#brain-state-analysis-from-sliding-window-fc"></a>
 </h2>
-<p>Both sliding-window FC and the correlation-of-correlations matrix can
-be used for K-means brain state discovery. The standard approach with
-sliding-window FC is to vectorise the upper triangle of each window’s FC
-matrix and cluster the resulting feature vectors:</p>
+<p>The upper triangle of each window’s FC matrix can be vectorised and
+clustered with K-means to identify recurring connectivity states.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Vectorise upper triangle for each window</span></span>
-<span><span class="va">ut</span>       <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">n_parcels</span><span class="op">)</span><span class="op">)</span>, arr.ind <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span>, <span class="fl">3</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="va">m</span><span class="op">[</span><span class="va">ut</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># features: [n_windows x n_edges]</span></span>
+<code class="sourceCode R"><span><span class="va">features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span>, <span class="fl">3</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="va">m</span><span class="op">[</span><span class="va">ut</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">K</span>  <span class="op">&lt;-</span> <span class="fl">5</span></span>
-<span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans</a></span><span class="op">(</span><span class="va">features</span>, centers <span class="op">=</span> <span class="va">K</span>, nstart <span class="op">=</span> <span class="fl">50</span>, iter.max <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  1  2  3  4  5 </span></span>
-<span><span class="co">#&gt; 16 50 14 11 24</span></span></code></pre></div>
-<p>The state sequence can then be passed to <code>stateR</code> for
+<span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans</a></span><span class="op">(</span><span class="va">features</span>, centers <span class="op">=</span> <span class="va">K</span>, nstart <span class="op">=</span> <span class="fl">100</span>, iter.max <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></code></pre></div>
+<p>Note on dimensionality: each feature vector has <em>N(N−1)/2</em>
+entries — 19,900 for 200 parcels. This high dimensionality makes K-means
+convergence slower and noisier than in the LEiDA case, where each
+feature vector has only <em>N</em> entries. For smaller datasets or
+single-subject analyses, the LEiDA approach (see
+<code><a href="../articles/phase-based-fc.html">vignette("phase-based-fc")</a></code>) is often preferable.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">state_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#8D9FD7"</span>, <span class="st">"#9E3C30"</span>, <span class="st">"#754D71"</span>, <span class="st">"#341C5D"</span>, <span class="st">"#E19A8F"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span>,</span>
+<span>                  state <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>       <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="va">state</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_tile</span><span class="op">(</span>height <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="va">state_cols</span>, name <span class="op">=</span> <span class="st">"State"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Window"</span>, y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Sliding-window brain state sequence (K = 5)"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.y  <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        panel.grid   <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="sliding-window-fc_files/figure-html/sw-state-seq-1.png" class="r-plt" alt="" width="672"></p>
+<p>The state sequence feeds directly into <code>stateR</code> for
 fractional occupancy, dwell time, and Markov transition analysis.</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Hutchison, R. M. et al. (2013). Dynamic functional connectivity:
+Promise, issues, and interpretations. <em>NeuroImage</em>, 80, 360–378.
+<a href="https://doi.org/10.1016/j.neuroimage.2013.05.079" class="external-link uri">https://doi.org/10.1016/j.neuroimage.2013.05.079</a></p>
+<p>Leonardi, N. &amp; Van De Ville, D. (2015). On spurious and real
+fluctuations of dynamic functional connectivity during rest.
+<em>NeuroImage</em>, 104, 430–436. <a href="https://doi.org/10.1016/j.neuroimage.2014.09.007" class="external-link uri">https://doi.org/10.1016/j.neuroimage.2014.09.007</a></p>
 <p>Hansen, E. C. A. et al. (2015). Functional connectivity dynamics:
 Modeling the switching behavior of the resting state.
 <em>NeuroImage</em>, 105, 525–535. <a href="https://doi.org/10.1016/j.neuroimage.2014.11.001" class="external-link uri">https://doi.org/10.1016/j.neuroimage.2014.11.001</a></p>

@@ -3,35 +3,61 @@
 ## What is dynamic functional connectivity?
 
 Resting-state fMRI measures the BOLD signal across brain regions over
-time. **Static** functional connectivity (FC) summarises this as a
-single correlation matrix — the average co-activation pattern across the
-entire scan. **Dynamic** functional connectivity (dynFC) asks a
-different question: does that pattern change over time, and if so, how?
+time. **Static** functional connectivity (FC) compresses this into a
+single correlation matrix — the time-averaged co-activation pattern
+across the entire scan. Convenient, but it discards everything that
+changes.
 
-`dynR` computes dynFC representations from preprocessed BOLD timeseries.
-It implements two complementary families of methods:
+**Dynamic functional connectivity (dynFC)** treats the time dimension
+seriously. It asks: does the pattern of co-activation between brain
+regions shift during a scan, and can those shifts tell us something
+about cognition, clinical state, or neural mechanisms?
 
-| Family | Key functions | What it captures |
+`dynR` computes dynFC representations from preprocessed BOLD timeseries,
+implementing two complementary families of methods:
+
+| Family | Core functions | What it captures |
 |----|----|----|
-| Phase-based | [`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md), [`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md), [`kuramoto()`](https://CoDe-Neuro.github.io/dynR/reference/kuramoto.md) | Instantaneous synchrony and phase relationships |
-| Correlation-based | [`corr_slide()`](https://CoDe-Neuro.github.io/dynR/reference/corr_slide.md), [`cofluct()`](https://CoDe-Neuro.github.io/dynR/reference/cofluct.md), [`corr_corr()`](https://CoDe-Neuro.github.io/dynR/reference/corr_corr.md) | Windowed or edge-level co-activation |
+| **Phase-based** | [`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md), [`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md), [`kuramoto()`](https://CoDe-Neuro.github.io/dynR/reference/kuramoto.md) | Instantaneous synchrony via the analytic signal |
+| **Correlation-based** | [`corr_slide()`](https://CoDe-Neuro.github.io/dynR/reference/corr_slide.md), [`cofluct()`](https://CoDe-Neuro.github.io/dynR/reference/cofluct.md), [`corr_corr()`](https://CoDe-Neuro.github.io/dynR/reference/corr_corr.md) | Windowed co-activation and edge dynamics |
 
-The outputs of `dynR` feed directly into
+Both families produce outputs that feed directly into
 [`stateR`](https://github.com/CoDe-Neuro/stateR) for brain state
-quantification (fractional occupancy, dwell time, Markov transitions).
+quantification.
+
+------------------------------------------------------------------------
+
+## When to use which approach
+
+Choosing between phase-based and correlation-based methods depends on
+your research question:
+
+|  | Phase-based | Correlation-based |
+|----|----|----|
+| **Temporal resolution** | Frame-by-frame (no window needed) | One estimate per window |
+| **Feature dimensionality** | *N* (one eigenvector per timepoint) | *N(N−1)/2* (upper triangle) |
+| **Window length choice** | Not required | Critical parameter |
+| **Best for** | Synchrony research, tractable state clustering, metastability | Interpretable FC, task-event alignment, edge dynamics |
+
+If you are new to dynFC, the **phase-based / LEiDA** pipeline is a good
+starting point: it requires no window length decision and produces
+compact, interpretable features. **Sliding-window FC** is more directly
+comparable to the broader published literature and easier to relate to
+task structure or behavioural events.
 
 ------------------------------------------------------------------------
 
 ## Package data
 
 `dynR` ships with a resting-state BOLD timeseries from the
-[edge-ts](https://github.com/brain-networks/edge-ts) repository,
-parcellated into 200 regions:
+[edge-ts](https://github.com/brain-networks/edge-ts) repository
+(Faskowitz et al., 2020), parcellated into 200 regions of interest. This
+dataset is used throughout all three vignettes.
 
 ``` r
 
-data(ts)   # [200 x 600] BOLD timeseries
-data(fc)   # [200 x 200] static FC matrix (ground truth)
+data(ts)   # [200 × 600] BOLD timeseries
+data(fc)   # [200 × 200] static FC matrix (ground truth)
 
 dim(ts)
 #> [1] 200 600
@@ -39,30 +65,30 @@ dim(fc)
 #> [1] 200 200
 ```
 
-200 parcels, 600 timepoints. We will use this throughout the vignettes.
+200 parcels, 600 timepoints — approximately 20 minutes at TR = 2 s.
 
 ------------------------------------------------------------------------
 
 ## Pipeline overview
 
-A typical dynR workflow looks like this:
-
     BOLD timeseries [N × Tmax]
             │
-            ├─── bandpass_filter()       ← optional preprocessing
+            ├─── bandpass_filter()       optional: restrict to 0.01–0.1 Hz
             │
-            ├─── Phase-based ────────────────────────────────────────
-            │     hilbert_phases()       → instantaneous phases [N × Tmax]
-            │     dyn_phase_lock()       → phase-locking matrices + LEiDA vectors
-            │     kuramoto()             → synchrony, metastability, entropy
+            ├─── PHASE-BASED ─────────────────────────────────────────────
+            │     hilbert_phases()   →  instantaneous phases  [N × Tmax]
+            │     dyn_phase_lock()   →  dPL matrices + LEiDA eigenvectors
+            │     kuramoto()         →  synchrony, metastability, entropy
             │
-            └─── Correlation-based ──────────────────────────────────
-                  corr_slide()          → sliding-window FC [N × N × windows]
-                  cofluct()             → edge time series + RSS
-                  corr_corr()           → correlation-of-correlations [Tmax × Tmax]
+            └─── CORRELATION-BASED ───────────────────────────────────────
+                  corr_slide()      →  FC matrices  [N × N × windows]
+                  cofluct()         →  edge time series + RSS
+                  corr_corr()       →  FC recurrence  [Tmax × Tmax]
                         │
                         ▼
-                  stateR (K-means → brain states)
+                  stateR  ──  fractional occupancy
+                          ──  dwell time
+                          ──  Markov transitions
 
 ------------------------------------------------------------------------
 
@@ -70,54 +96,78 @@ A typical dynR workflow looks like this:
 
 ``` r
 
-# 1. Extract instantaneous phases via the Hilbert transform
+# Instantaneous phases via the Hilbert transform
 phases <- hilbert_phases(ts)
-dim(phases)  # same as ts: [200 x 600]
-#> [1] 200 600
 
-# 2. Dynamic phase-locking matrices + leading eigenvectors (LEiDA)
+# Dynamic phase-locking matrices + LEiDA eigenvectors
 dpl <- dyn_phase_lock(phases)
-dim(dpl$sync_conn)  # [200 x 200 x 580]  (trimmed 10 timepoints each end)
-#> [1] 200 200 580
-dim(dpl$leida)      # [580 x 200]         leading eigenvectors
-#> [1] 580 200
+cat("LEiDA matrix:", nrow(dpl$leida), "timepoints ×",
+    ncol(dpl$leida), "parcels\n")
+#> LEiDA matrix: 580 timepoints × 200 parcels
 
-# 3. Kuramoto order parameter
+# Kuramoto order parameter
 kop <- kuramoto(phases)
 cat("Metastability:", round(kop$metastability, 4), "\n")
 #> Metastability: 0.0796
-cat("Entropy:      ", round(kop$entropy, 4), "\n")
-#> Entropy:       6.1484
 ```
-
-The `leida` matrix — one leading eigenvector per timepoint — is ready to
-pass to K-means for brain state discovery.
-
-------------------------------------------------------------------------
-
-## Quick example: sliding-window pipeline
 
 ``` r
 
-# Sliding-window correlation: 30-timepoint windows, step of 5
-sw <- corr_slide(ts, window = 30, step = 5)
-cat("Number of windows:", dim(sw$corr_mats)[3], "\n")
-#> Number of windows: 115
-
-# Edge-centric cofluctuations
-ec <- cofluct(ts)
-cat("Edge time series shape:", nrow(ec$edge_ts), "x", ncol(ec$edge_ts), "\n")
-#> Edge time series shape: 19900 x 600
-cat("RSS range: [", round(min(ec$rss), 2), ",", round(max(ec$rss), 2), "]\n")
-#> RSS range: [ 12.4 , 499.65 ]
+ggplot(data.frame(t = seq_along(kop$synchrony), R = kop$synchrony),
+       aes(x = t, y = R)) +
+  geom_line(colour = "#8D9FD7", linewidth = 0.7) +
+  geom_hline(yintercept = mean(kop$synchrony),
+             colour = "#9E3C30", linetype = "dashed", linewidth = 0.9) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Timepoint", y = "R(t)",
+       title = "Kuramoto order parameter",
+       subtitle = paste0("Metastability = ",
+                         round(kop$metastability, 4))) +
+  theme_minimal(base_size = 13) +
+  theme(panel.grid.minor = element_blank())
 ```
+
+![](getting-started_files/figure-html/phase-plot-1.png)
 
 ------------------------------------------------------------------------
 
-## Validating against static FC
+## Quick example: correlation-based pipeline
 
-A useful sanity check: a single window spanning the full timeseries
-should reproduce the static FC matrix exactly.
+``` r
+
+# Sliding-window FC: 30-timepoint windows, step 5
+sw <- corr_slide(ts, window = 30, step = 5)
+cat("Windows:", dim(sw$corr_mats)[3], "\n")
+#> Windows: 115
+
+# Edge-centric cofluctuations
+ec <- cofluct(ts)
+cat("Edges:", nrow(ec$edge_ts), "× Timepoints:", ncol(ec$edge_ts), "\n")
+#> Edges: 19900 × Timepoints: 600
+```
+
+``` r
+
+ggplot(data.frame(t = seq_along(ec$rss), rss = ec$rss),
+       aes(x = t, y = rss)) +
+  geom_line(colour = "#8D9FD7", linewidth = 0.7) +
+  geom_hline(yintercept = mean(ec$rss) + 2 * sd(ec$rss),
+             colour = "#9E3C30", linetype = "dashed", linewidth = 0.9) +
+  labs(x = "Timepoint", y = "RSS",
+       title = "Root-sum-square cofluctuation",
+       subtitle = "Dashed line: mean + 2 SD") +
+  theme_minimal(base_size = 13) +
+  theme(panel.grid.minor = element_blank())
+```
+
+![](getting-started_files/figure-html/sw-plot-1.png)
+
+------------------------------------------------------------------------
+
+## Sanity check: single window equals static FC
+
+A single window spanning the full timeseries must recover the static FC
+matrix exactly — a useful first validation for any new dataset.
 
 ``` r
 
@@ -129,12 +179,21 @@ cat("Max deviation from static FC:", formatC(max_diff, format = "e"), "\n")
 
 ------------------------------------------------------------------------
 
-## What comes next
+## Further reading
 
 - [`vignette("phase-based-fc")`](https://CoDe-Neuro.github.io/dynR/articles/phase-based-fc.md)
-  — Hilbert transform, LEiDA, and the Kuramoto order parameter in depth
+  — Hilbert transform, LEiDA, K-means, and the Kuramoto order parameter
+  in depth
 - [`vignette("sliding-window-fc")`](https://CoDe-Neuro.github.io/dynR/articles/sliding-window-fc.md)
-  — sliding-window correlation and edge-centric cofluctuations
-- Passing `dpl$leida` to
-  [`kmeans()`](https://rdrr.io/r/stats/kmeans.html) and `stateR` for
-  brain state quantification
+  — window length trade-offs, edge cofluctuations, and FC recurrence
+- [`stateR`](https://github.com/CoDe-Neuro/stateR) — downstream brain
+  state metrics
+
+------------------------------------------------------------------------
+
+## References
+
+Faskowitz, J. et al. (2020). Edge-centric functional network
+representations of human cerebral cortex reveal overlapping system-level
+architecture. *Nature Neuroscience*, 23(12), 1644–1654.
+<https://doi.org/10.1038/s41593-020-00719-y>

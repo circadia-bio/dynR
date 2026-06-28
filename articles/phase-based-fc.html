@@ -153,11 +153,17 @@
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <p>Phase-based dynFC methods characterise functional connectivity
-through the <strong>instantaneous phase</strong> of the BOLD signal
-rather than its amplitude. The analytic signal (Hilbert transform)
-decomposes each parcel’s timeseries into a phase and an envelope, and
-the phase relationships across parcels carry information about transient
-synchronisation states.</p>
+through the <strong>instantaneous phase</strong> of the BOLD signal.
+Rather than asking how <em>correlated</em> two regions are over a
+window, they ask: are two regions <strong>synchronised</strong> at this
+exact moment — oscillating in phase, or in anti-phase?</p>
+<p>This perspective originates in the physics of coupled oscillators.
+Each parcel’s BOLD timeseries, once bandpass-filtered to a specific
+frequency band, behaves like a noisy oscillator. The Hilbert transform
+extracts the instantaneous phase of that oscillation at every timepoint.
+Two parcels are phase-locked when their phases move together; they are
+in anti-phase synchrony when their phases are consistently offset by π
+radians.</p>
 <p><code>dynR</code> implements three phase-based methods:</p>
 <table class="table">
 <colgroup>
@@ -195,17 +201,24 @@ synchronisation states.</p>
 <div class="section level2">
 <h2 id="step-1-bandpass-filtering">Step 1: Bandpass filtering<a class="anchor" aria-label="anchor" href="#step-1-bandpass-filtering"></a>
 </h2>
-<p>Before extracting phases, it is standard practice to bandpass filter
-the BOLD signal to the frequency range of interest. For resting-state
-fMRI with a TR of 2 s, the typical band is 0.01–0.1 Hz.</p>
+<p>Phase extraction via the Hilbert transform assumes the signal is
+approximately <strong>monocomponent</strong> — dominated by oscillations
+within a single frequency band. Applying a bandpass filter before the
+transform is therefore not merely conventional; it is necessary. Without
+it, broadband noise and low-frequency drift corrupt the phase estimate,
+producing meaningless phase differences between parcels.</p>
+<p>For resting-state fMRI at TR = 2 s, the standard band is
+<strong>0.01–0.1 Hz</strong>, which preserves the slow fluctuations that
+drive functional connectivity while attenuating scanner drift (&lt; 0.01
+Hz) and physiological noise (&gt; 0.1 Hz).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ts_filt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">ts</span>, <span class="fl">1</span>, <span class="va">bandpass_filter</span>,</span>
 <span>                 flp <span class="op">=</span> <span class="fl">0.01</span>, fhi <span class="op">=</span> <span class="fl">0.1</span>, delt <span class="op">=</span> <span class="fl">2</span>, order <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">ts_filt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span>   <span class="co"># restore [N x Tmax] orientation</span></span>
+<span><span class="va">ts_filt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span>   <span class="co"># restore [N × Tmax] orientation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 200 600</span></span></code></pre></div>
-<p>The <code>apply</code> call filters each parcel (row) independently;
-<code><a href="https://rdrr.io/r/base/t.html" class="external-link">t()</a></code> restores the
+<p>The <code><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply()</a></code> call filters each parcel (row)
+independently; <code><a href="https://rdrr.io/r/base/t.html" class="external-link">t()</a></code> restores the
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>×</mo><mi>T</mi><mi>m</mi><mi>a</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">N × Tmax</annotation></semantics></math>
 convention expected by downstream functions.</p>
 <hr>
@@ -213,14 +226,14 @@ convention expected by downstream functions.</p>
 <div class="section level2">
 <h2 id="step-2-instantaneous-phases-via-the-hilbert-transform">Step 2: Instantaneous phases via the Hilbert transform<a class="anchor" aria-label="anchor" href="#step-2-instantaneous-phases-via-the-hilbert-transform"></a>
 </h2>
-<p><code><a href="../reference/hilbert_phases.html">hilbert_phases()</a></code> computes the analytic signal of each
-(demeaned) parcel timeseries and extracts the instantaneous phase
-angle.</p>
+<p><code><a href="../reference/hilbert_phases.html">hilbert_phases()</a></code> constructs the <strong>analytic
+signal</strong> for each parcel — a complex-valued representation whose
+argument gives the instantaneous phase angle at every timepoint.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">phases</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hilbert_phases.html">hilbert_phases</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span>   <span class="co"># [200 x 600]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span>    <span class="co"># [200 × 600]</span></span>
 <span><span class="co">#&gt; [1] 200 600</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span> <span class="co"># in [-pi, pi]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span>  <span class="co"># in [-pi, pi]</span></span>
 <span><span class="co">#&gt; [1] -3.141541  3.141524</span></span></code></pre></div>
 <p>Each row is a parcel; each column is a timepoint. Values are in
 radians.</p>
@@ -229,121 +242,176 @@ radians.</p>
 <div class="section level2">
 <h2 id="step-3-dynamic-phase-locking-matrix-dpl-and-leida">Step 3: Dynamic phase-locking matrix (dPL) and LEiDA<a class="anchor" aria-label="anchor" href="#step-3-dynamic-phase-locking-matrix-dpl-and-leida"></a>
 </h2>
-<p>For each timepoint <em>t</em>, <code><a href="../reference/dyn_phase_lock.html">dyn_phase_lock()</a></code>
+<div class="section level3">
+<h3 id="the-dpl-matrix">The dPL matrix<a class="anchor" aria-label="anchor" href="#the-dpl-matrix"></a>
+</h3>
+<p>At each timepoint <em>t</em>, <code><a href="../reference/dyn_phase_lock.html">dyn_phase_lock()</a></code>
 constructs an <em>N</em> × <em>N</em> <strong>phase-locking
-matrix</strong> whose entry <em>(i, j)</em> is:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mtext mathvariant="normal">dPL</mtext><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">cos</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>ϕ</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msub><mi>ϕ</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\text{dPL}_{ij}(t) = \cos(\phi_i(t) - \phi_j(t))</annotation></semantics></math></p>
-<p>where <em>φ</em> denotes instantaneous phase. A value near 1
-indicates the two parcels are phase-locked; a value near −1 indicates
-anti-phase synchrony.</p>
-<p>The <strong>leading eigenvector</strong> (LEiDA) of each dPL matrix
-captures the dominant large-scale synchronisation pattern at that
-timepoint (Cabral et al., 2017). Ten timepoints are trimmed from each
-end to avoid Hilbert transform edge effects.</p>
+matrix</strong>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mtext mathvariant="normal">dPL</mtext><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">cos</mi><mo>⁡</mo></mrow><mspace width="-0.167em"></mspace><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><msub><mi>ϕ</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msub><mi>ϕ</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\text{dPL}_{ij}(t) = \cos\!\bigl(\phi_i(t) - \phi_j(t)\bigr)</annotation></semantics></math></p>
+<p>Entry (<em>i</em>, <em>j</em>) = 1 when parcels <em>i</em> and
+<em>j</em> are perfectly in phase; −1 when perfectly anti-phase. The
+matrix is symmetric and has ones on the diagonal. Ten timepoints are
+trimmed from each end to avoid Hilbert transform edge effects.</p>
+</div>
+<div class="section level3">
+<h3 id="the-leading-eigenvector-leida">The leading eigenvector (LEiDA)<a class="anchor" aria-label="anchor" href="#the-leading-eigenvector-leida"></a>
+</h3>
+<p>The dominant structure in each dPL matrix is captured by its
+<strong>leading eigenvector</strong> — the eigenvector corresponding to
+the largest eigenvalue. This vector has one entry per parcel:</p>
+<ul>
+<li>Parcels with the <strong>same sign</strong> are synchronised with
+each other at that moment.</li>
+<li>Parcels with <strong>opposite signs</strong> are in anti-phase.</li>
+<li>The <strong>magnitude</strong> of each entry reflects how strongly
+that parcel participates in the dominant pattern.</li>
+</ul>
+<p>By tracking how this vector evolves over time and clustering it, we
+identify recurring whole-brain phase-locking patterns — <strong>brain
+states</strong> — without ever specifying a window length. This is the
+LEiDA framework (Cabral et al., 2017).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dpl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dyn_phase_lock.html">dyn_phase_lock</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Phase-locking array: [200 x 200 x 580]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">sync_conn</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">sync_conn</span><span class="op">)</span>   <span class="co"># [200 × 200 × 580]</span></span>
 <span><span class="co">#&gt; [1] 200 200 580</span></span>
-<span></span>
-<span><span class="co"># LEiDA matrix: [580 x 200]  — one eigenvector per (trimmed) timepoint</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span><span class="op">)</span>       <span class="co"># [580 × 200]</span></span>
 <span><span class="co">#&gt; [1] 580 200</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="inspecting-a-single-phase-locking-matrix">Inspecting a single phase-locking matrix<a class="anchor" aria-label="anchor" href="#inspecting-a-single-phase-locking-matrix"></a>
-</h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Symmetry and diagonal check on the first timepoint</span></span>
-<span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="va">dpl</span><span class="op">$</span><span class="va">sync_conn</span><span class="op">[</span>, , <span class="fl">1</span><span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Symmetric:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">t1</span>, <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">t1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Symmetric: TRUE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Diagonal:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">t1</span><span class="op">)</span><span class="op">)</span>, <span class="fl">6</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span>   <span class="co"># cos(0) = 1</span></span>
-<span><span class="co">#&gt; Diagonal: 1</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="va">dpl</span><span class="op">$</span><span class="va">sync_conn</span><span class="op">[</span>, , <span class="fl">1</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Symmetric:    "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">t1</span>, <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">t1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Symmetric:     TRUE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Diagonal = 1: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">t1</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">1e-10</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Diagonal = 1:  TRUE</span></span></code></pre></div>
 <hr>
 </div>
 </div>
 <div class="section level2">
 <h2 id="step-4-brain-state-discovery-with-k-means">Step 4: Brain state discovery with K-means<a class="anchor" aria-label="anchor" href="#step-4-brain-state-discovery-with-k-means"></a>
 </h2>
-<p>The LEiDA vectors are the natural input to K-means clustering. Each
-cluster centre represents a recurring whole-brain phase-locking pattern
-— a <strong>brain state</strong>.</p>
+<p>LEiDA vectors are clustered across time to identify recurring
+phase-locking patterns. K-means is the standard choice (Cabral et al.,
+2017; Lord et al., 2019).</p>
+<div class="section level3">
+<h3 id="choosing-k">Choosing K<a class="anchor" aria-label="anchor" href="#choosing-k"></a>
+</h3>
+<p>There is no universal rule for K. In practice:</p>
+<ul>
+<li>
+<strong>K = 2–3</strong> captures coarse global organisation
+(e.g. default mode vs. task-positive network).</li>
+<li>
+<strong>K = 5–10</strong> resolves finer network-level distinctions
+commonly seen in resting-state data.</li>
+<li>
+<strong>K &gt; 15</strong> risks overfitting to session-specific
+noise without adding interpretable new states.</li>
+</ul>
+<p>A common approach is to sweep over a range of K values, compute a
+stability metric (silhouette coefficient or variance explained), and
+select the K at which additional states no longer yield coherent new
+patterns. For a single scan, <strong>K = 5</strong> is a reasonable
+starting point.</p>
+<p>The <code>nstart</code> argument is critical: K-means is sensitive to
+initialisation, so running many random restarts and keeping the best
+solution is essential.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">K</span>  <span class="op">&lt;-</span> <span class="fl">5</span></span>
-<span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span>, centers <span class="op">=</span> <span class="va">K</span>, nstart <span class="op">=</span> <span class="fl">50</span>, iter.max <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
-<span></span>
+<span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span>, centers <span class="op">=</span> <span class="va">K</span>, nstart <span class="op">=</span> <span class="fl">100</span>, iter.max <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   1   2   3   4   5 </span></span>
 <span><span class="co">#&gt; 102 184  78 100 116</span></span></code></pre></div>
-<p>The resulting state sequence (<code>km$cluster</code>) can be passed
-directly to <code>stateR</code> for fractional occupancy, dwell time,
-and Markov transition analysis.</p>
+</div>
+<div class="section level3">
+<h3 id="state-sequence">State sequence<a class="anchor" aria-label="anchor" href="#state-sequence"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">state_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#8D9FD7"</span>, <span class="st">"#9E3C30"</span>, <span class="st">"#754D71"</span>, <span class="st">"#341C5D"</span>, <span class="st">"#E19A8F"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span>,</span>
+<span>                  state <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>       <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="va">state</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_tile</span><span class="op">(</span>height <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_fill_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="va">state_cols</span>, name <span class="op">=</span> <span class="st">"State"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Timepoint"</span>, y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Brain state sequence (K = 5)"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.y  <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        panel.grid   <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="phase-based-fc_files/figure-html/state-seq-1.png" class="r-plt" alt="" width="672"></p>
+<p>The state sequence (<code>km$cluster</code>) feeds directly into
+<code>stateR</code> for fractional occupancy, dwell time, and Markov
+transition analysis.</p>
 <hr>
+</div>
 </div>
 <div class="section level2">
 <h2 id="step-5-kuramoto-order-parameter">Step 5: Kuramoto order parameter<a class="anchor" aria-label="anchor" href="#step-5-kuramoto-order-parameter"></a>
 </h2>
-<p>The <strong>Kuramoto order parameter</strong> <em>R(t)</em> measures
-the instantaneous global synchrony across all parcels:</p>
+<div class="section level3">
+<h3 id="the-measure">The measure<a class="anchor" aria-label="anchor" href="#the-measure"></a>
+</h3>
+<p>The <strong>Kuramoto order parameter</strong> <em>R</em>(<em>t</em>)
+measures the degree of global phase synchrony across all parcels at each
+timepoint:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><mrow><mo stretchy="true" form="prefix">|</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msup><mi>e</mi><mrow><mi>i</mi><msub><mi>ϕ</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="true" form="postfix">|</mo></mrow></mrow><annotation encoding="application/x-tex">R(t) = \frac{1}{N} \left| \sum_{j=1}^{N} e^{i\phi_j(t)} \right|</annotation></semantics></math></p>
-<p><em>R</em> = 1 means all parcels are perfectly phase-locked;
-<em>R</em> = 0 means phases are uniformly distributed.
-<code><a href="../reference/kuramoto.html">kuramoto()</a></code> returns the full synchrony time series along
-with two summary scalars:</p>
+<p><em>R</em> = 1 means all parcels are perfectly phase-locked.
+<em>R</em> = 0 means phases are uniformly distributed — no coherent
+synchrony anywhere.</p>
+</div>
+<div class="section level3">
+<h3 id="metastability">Metastability<a class="anchor" aria-label="anchor" href="#metastability"></a>
+</h3>
+<p>The standard deviation of <em>R</em>(<em>t</em>) over the full scan
+is the <strong>metastability index</strong>: a measure of how much the
+global synchronisation level fluctuates.</p>
 <ul>
 <li>
-<strong>Metastability</strong> — standard deviation of
-<em>R(t)</em>; reflects how much the global synchronisation level
-fluctuates over time.</li>
+<strong>High metastability</strong>: the brain moves fluidly between
+synchronised and desynchronised states — a flexible, exploratory dynamic
+repertoire.</li>
 <li>
-<strong>Entropy</strong> — Shannon entropy of the discretised
-synchrony distribution; captures the diversity of synchrony states
-visited.</li>
+<strong>Low metastability</strong>: synchronisation is more rigid,
+with less spontaneous switching.</li>
 </ul>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<p>Metastability has been linked to cognitive flexibility (Deco et al.,
+2017). Reductions have been observed in ageing (Cabral et al., 2014) and
+certain psychiatric conditions. Psilocybin markedly increases
+metastability, consistent with a pharmacologically expanded dynamic
+repertoire (Lord et al., 2019).</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/kuramoto.html">kuramoto</a></span><span class="op">(</span><span class="va">phases</span>, base <span class="op">=</span> <span class="fl">2</span>, n_bits <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Metastability:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">metastability</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Metastability: 0.0787</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Entropy (bits):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">entropy</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Entropy (bits): 6.1409</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Synchrony range: ["</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">","</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"]\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Synchrony range: [ 0.01 , 0.376 ]</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="visualising-the-synchrony-time-series">Visualising the synchrony time series<a class="anchor" aria-label="anchor" href="#visualising-the-synchrony-time-series"></a>
-</h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="st">"#1B6799"</span>,</span>
-<span>     xlab <span class="op">=</span> <span class="st">"Timepoint"</span>, ylab <span class="op">=</span> <span class="st">"R(t)"</span>,</span>
-<span>     main <span class="op">=</span> <span class="st">"Kuramoto order parameter"</span>,</span>
-<span>     ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"#FC544A"</span>, lty <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, legend <span class="op">=</span> <span class="st">"Mean R(t)"</span>, col <span class="op">=</span> <span class="st">"#FC544A"</span>,</span>
-<span>       lty <span class="op">=</span> <span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">1.5</span>, bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; Entropy (bits): 6.1409</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df_kop</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span>, R <span class="op">=</span> <span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">df_kop</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">R</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#8D9FD7"</span>, linewidth <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"#9E3C30"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">annotate</span><span class="op">(</span><span class="st">"text"</span>,</span>
+<span>           x     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">df_kop</span><span class="op">$</span><span class="va">t</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.02</span>,</span>
+<span>           y     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.04</span>,</span>
+<span>           label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Mean = "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>           colour <span class="op">=</span> <span class="st">"#9E3C30"</span>, size <span class="op">=</span> <span class="fl">3.5</span>, hjust <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Timepoint"</span>, y <span class="op">=</span> <span class="st">"R(t)"</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Kuramoto order parameter"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Metastability = "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">metastability</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>                         <span class="st">"   |   Entropy = "</span>,</span>
+<span>                         <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">entropy</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">" bits"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>panel.grid.minor <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="phase-based-fc_files/figure-html/kuramoto-plot-1.png" class="r-plt" alt="" width="672"></p>
 <hr>
 </div>
-</div>
-<div class="section level2">
-<h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
-</h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Parcels:              "</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Parcels:               200</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Timepoints (raw):     "</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Timepoints (raw):      600</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Timepoints (trimmed): "</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Timepoints (trimmed):  580</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Brain states (K):     "</span>, <span class="va">K</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Brain states (K):      5</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Metastability:        "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">metastability</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Metastability:         0.0787</span></span></code></pre></div>
-<hr>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -351,6 +419,9 @@ visited.</li>
 <p>Cabral, J. et al. (2017). Cognitive performance in healthy older
 adults relates to spontaneous switching between states of functional
 connectivity during rest. <em>Scientific Reports</em>, 7(1), 5135. <a href="https://doi.org/10.1038/s41598-017-05425-7" class="external-link uri">https://doi.org/10.1038/s41598-017-05425-7</a></p>
+<p>Deco, G. et al. (2017). The dynamics of resting fluctuations in the
+brain: metastability and its dynamical cortical core. <em>Scientific
+Reports</em>, 7(1), 3095. <a href="https://doi.org/10.1038/s41598-017-03073-5" class="external-link uri">https://doi.org/10.1038/s41598-017-03073-5</a></p>
 <p>Lord, L.-D. et al. (2019). Dynamical exploration of the repertoire of
 brain networks at rest is modulated by psilocybin. <em>NeuroImage</em>,
 199, 127–142. <a href="https://doi.org/10.1016/j.neuroimage.2019.05.060" class="external-link uri">https://doi.org/10.1016/j.neuroimage.2019.05.060</a></p>

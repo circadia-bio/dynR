@@ -153,14 +153,16 @@
 <h2 id="what-is-dynamic-functional-connectivity">What is dynamic functional connectivity?<a class="anchor" aria-label="anchor" href="#what-is-dynamic-functional-connectivity"></a>
 </h2>
 <p>Resting-state fMRI measures the BOLD signal across brain regions over
-time. <strong>Static</strong> functional connectivity (FC) summarises
-this as a single correlation matrix — the average co-activation pattern
-across the entire scan. <strong>Dynamic</strong> functional connectivity
-(dynFC) asks a different question: does that pattern change over time,
-and if so, how?</p>
+time. <strong>Static</strong> functional connectivity (FC) compresses
+this into a single correlation matrix — the time-averaged co-activation
+pattern across the entire scan. Convenient, but it discards everything
+that changes.</p>
+<p><strong>Dynamic functional connectivity (dynFC)</strong> treats the
+time dimension seriously. It asks: does the pattern of co-activation
+between brain regions shift during a scan, and can those shifts tell us
+something about cognition, clinical state, or neural mechanisms?</p>
 <p><code>dynR</code> computes dynFC representations from preprocessed
-BOLD timeseries. It implements two complementary families of
-methods:</p>
+BOLD timeseries, implementing two complementary families of methods:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -169,31 +171,79 @@ methods:</p>
 </colgroup>
 <thead><tr class="header">
 <th>Family</th>
-<th>Key functions</th>
+<th>Core functions</th>
 <th>What it captures</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Phase-based</td>
+<td><strong>Phase-based</strong></td>
 <td>
 <code><a href="../reference/hilbert_phases.html">hilbert_phases()</a></code>, <code><a href="../reference/dyn_phase_lock.html">dyn_phase_lock()</a></code>,
 <code><a href="../reference/kuramoto.html">kuramoto()</a></code>
 </td>
-<td>Instantaneous synchrony and phase relationships</td>
+<td>Instantaneous synchrony via the analytic signal</td>
 </tr>
 <tr class="even">
-<td>Correlation-based</td>
+<td><strong>Correlation-based</strong></td>
 <td>
 <code><a href="../reference/corr_slide.html">corr_slide()</a></code>, <code><a href="../reference/cofluct.html">cofluct()</a></code>,
 <code><a href="../reference/corr_corr.html">corr_corr()</a></code>
 </td>
-<td>Windowed or edge-level co-activation</td>
+<td>Windowed co-activation and edge dynamics</td>
 </tr>
 </tbody>
 </table>
-<p>The outputs of <code>dynR</code> feed directly into <a href="https://github.com/CoDe-Neuro/stateR" class="external-link"><code>stateR</code></a> for
-brain state quantification (fractional occupancy, dwell time, Markov
-transitions).</p>
+<p>Both families produce outputs that feed directly into <a href="https://github.com/CoDe-Neuro/stateR" class="external-link"><code>stateR</code></a> for
+brain state quantification.</p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="when-to-use-which-approach">When to use which approach<a class="anchor" aria-label="anchor" href="#when-to-use-which-approach"></a>
+</h2>
+<p>Choosing between phase-based and correlation-based methods depends on
+your research question:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th></th>
+<th>Phase-based</th>
+<th>Correlation-based</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>Temporal resolution</strong></td>
+<td>Frame-by-frame (no window needed)</td>
+<td>One estimate per window</td>
+</tr>
+<tr class="even">
+<td><strong>Feature dimensionality</strong></td>
+<td>
+<em>N</em> (one eigenvector per timepoint)</td>
+<td>
+<em>N(N−1)/2</em> (upper triangle)</td>
+</tr>
+<tr class="odd">
+<td><strong>Window length choice</strong></td>
+<td>Not required</td>
+<td>Critical parameter</td>
+</tr>
+<tr class="even">
+<td><strong>Best for</strong></td>
+<td>Synchrony research, tractable state clustering, metastability</td>
+<td>Interpretable FC, task-event alignment, edge dynamics</td>
+</tr>
+</tbody>
+</table>
+<p>If you are new to dynFC, the <strong>phase-based / LEiDA</strong>
+pipeline is a good starting point: it requires no window length decision
+and produces compact, interpretable features. <strong>Sliding-window
+FC</strong> is more directly comparable to the broader published
+literature and easier to relate to task structure or behavioural
+events.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -201,90 +251,109 @@ transitions).</p>
 </h2>
 <p><code>dynR</code> ships with a resting-state BOLD timeseries from the
 <a href="https://github.com/brain-networks/edge-ts" class="external-link">edge-ts</a>
-repository, parcellated into 200 regions:</p>
+repository (Faskowitz et al., 2020), parcellated into 200 regions of
+interest. This dataset is used throughout all three vignettes.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span>   <span class="co"># [200 x 600] BOLD timeseries</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span>   <span class="co"># [200 x 200] static FC matrix (ground truth)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span>   <span class="co"># [200 × 600] BOLD timeseries</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span>   <span class="co"># [200 × 200] static FC matrix (ground truth)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 200 600</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 200 200</span></span></code></pre></div>
-<p>200 parcels, 600 timepoints. We will use this throughout the
-vignettes.</p>
+<p>200 parcels, 600 timepoints — approximately 20 minutes at TR = 2
+s.</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="pipeline-overview">Pipeline overview<a class="anchor" aria-label="anchor" href="#pipeline-overview"></a>
 </h2>
-<p>A typical dynR workflow looks like this:</p>
 <pre><code>BOLD timeseries [N × Tmax]
         │
-        ├─── bandpass_filter()       ← optional preprocessing
+        ├─── bandpass_filter()       optional: restrict to 0.01–0.1 Hz
         │
-        ├─── Phase-based ────────────────────────────────────────
-        │     hilbert_phases()       → instantaneous phases [N × Tmax]
-        │     dyn_phase_lock()       → phase-locking matrices + LEiDA vectors
-        │     kuramoto()             → synchrony, metastability, entropy
+        ├─── PHASE-BASED ─────────────────────────────────────────────
+        │     hilbert_phases()   →  instantaneous phases  [N × Tmax]
+        │     dyn_phase_lock()   →  dPL matrices + LEiDA eigenvectors
+        │     kuramoto()         →  synchrony, metastability, entropy
         │
-        └─── Correlation-based ──────────────────────────────────
-              corr_slide()          → sliding-window FC [N × N × windows]
-              cofluct()             → edge time series + RSS
-              corr_corr()           → correlation-of-correlations [Tmax × Tmax]
+        └─── CORRELATION-BASED ───────────────────────────────────────
+              corr_slide()      →  FC matrices  [N × N × windows]
+              cofluct()         →  edge time series + RSS
+              corr_corr()       →  FC recurrence  [Tmax × Tmax]
                     │
                     ▼
-              stateR (K-means → brain states)</code></pre>
+              stateR  ──  fractional occupancy
+                      ──  dwell time
+                      ──  Markov transitions</code></pre>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="quick-example-phase-based-pipeline">Quick example: phase-based pipeline<a class="anchor" aria-label="anchor" href="#quick-example-phase-based-pipeline"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 1. Extract instantaneous phases via the Hilbert transform</span></span>
+<code class="sourceCode R"><span><span class="co"># Instantaneous phases via the Hilbert transform</span></span>
 <span><span class="va">phases</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hilbert_phases.html">hilbert_phases</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span>  <span class="co"># same as ts: [200 x 600]</span></span>
-<span><span class="co">#&gt; [1] 200 600</span></span>
 <span></span>
-<span><span class="co"># 2. Dynamic phase-locking matrices + leading eigenvectors (LEiDA)</span></span>
+<span><span class="co"># Dynamic phase-locking matrices + LEiDA eigenvectors</span></span>
 <span><span class="va">dpl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dyn_phase_lock.html">dyn_phase_lock</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">sync_conn</span><span class="op">)</span>  <span class="co"># [200 x 200 x 580]  (trimmed 10 timepoints each end)</span></span>
-<span><span class="co">#&gt; [1] 200 200 580</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span><span class="op">)</span>      <span class="co"># [580 x 200]         leading eigenvectors</span></span>
-<span><span class="co">#&gt; [1] 580 200</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"LEiDA matrix:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span><span class="op">)</span>, <span class="st">"timepoints ×"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span><span class="op">)</span>, <span class="st">"parcels\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; LEiDA matrix: 580 timepoints × 200 parcels</span></span>
 <span></span>
-<span><span class="co"># 3. Kuramoto order parameter</span></span>
+<span><span class="co"># Kuramoto order parameter</span></span>
 <span><span class="va">kop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/kuramoto.html">kuramoto</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Metastability:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">metastability</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Metastability: 0.0796</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Entropy:      "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">entropy</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Entropy:       6.1484</span></span></code></pre></div>
-<p>The <code>leida</code> matrix — one leading eigenvector per timepoint
-— is ready to pass to K-means for brain state discovery.</p>
+<span><span class="co">#&gt; Metastability: 0.0796</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span>, R <span class="op">=</span> <span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span>,</span>
+<span>       <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">R</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#8D9FD7"</span>, linewidth <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">synchrony</span><span class="op">)</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"#9E3C30"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Timepoint"</span>, y <span class="op">=</span> <span class="st">"R(t)"</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Kuramoto order parameter"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Metastability = "</span>,</span>
+<span>                         <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kop</span><span class="op">$</span><span class="va">metastability</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>panel.grid.minor <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/phase-plot-1.png" class="r-plt" alt="" width="672"></p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="quick-example-sliding-window-pipeline">Quick example: sliding-window pipeline<a class="anchor" aria-label="anchor" href="#quick-example-sliding-window-pipeline"></a>
+<h2 id="quick-example-correlation-based-pipeline">Quick example: correlation-based pipeline<a class="anchor" aria-label="anchor" href="#quick-example-correlation-based-pipeline"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Sliding-window correlation: 30-timepoint windows, step of 5</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Sliding-window FC: 30-timepoint windows, step 5</span></span>
 <span><span class="va">sw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/corr_slide.html">corr_slide</a></span><span class="op">(</span><span class="va">ts</span>, window <span class="op">=</span> <span class="fl">30</span>, step <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Number of windows:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Number of windows: 115</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Windows:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Windows: 115</span></span>
 <span></span>
 <span><span class="co"># Edge-centric cofluctuations</span></span>
 <span><span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cofluct.html">cofluct</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Edge time series shape:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">edge_ts</span><span class="op">)</span>, <span class="st">"x"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">edge_ts</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Edge time series shape: 19900 x 600</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"RSS range: ["</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">","</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"]\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; RSS range: [ 12.4 , 499.65 ]</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Edges:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">edge_ts</span><span class="op">)</span>, <span class="st">"× Timepoints:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">edge_ts</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Edges: 19900 × Timepoints: 600</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span>, rss <span class="op">=</span> <span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span>,</span>
+<span>       <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">rss</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#8D9FD7"</span>, linewidth <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">ec</span><span class="op">$</span><span class="va">rss</span><span class="op">)</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"#9E3C30"</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Timepoint"</span>, y <span class="op">=</span> <span class="st">"RSS"</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Root-sum-square cofluctuation"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Dashed line: mean + 2 SD"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">13</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>panel.grid.minor <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getting-started_files/figure-html/sw-plot-1.png" class="r-plt" alt="" width="672"></p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="validating-against-static-fc">Validating against static FC<a class="anchor" aria-label="anchor" href="#validating-against-static-fc"></a>
+<h2 id="sanity-check-single-window-equals-static-fc">Sanity check: single window equals static FC<a class="anchor" aria-label="anchor" href="#sanity-check-single-window-equals-static-fc"></a>
 </h2>
-<p>A useful sanity check: a single window spanning the full timeseries
-should reproduce the static FC matrix exactly.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>A single window spanning the full timeseries must recover the static
+FC matrix exactly — a useful first validation for any new dataset.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">full_window</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/corr_slide.html">corr_slide</a></span><span class="op">(</span><span class="va">ts</span>, window <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">max_diff</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">full_window</span><span class="op">$</span><span class="va">corr_mats</span><span class="op">[</span>, , <span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="va">fc</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Max deviation from static FC:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/formatc.html" class="external-link">formatC</a></span><span class="op">(</span><span class="va">max_diff</span>, format <span class="op">=</span> <span class="st">"e"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -292,18 +361,27 @@ should reproduce the static FC matrix exactly.</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="what-comes-next">What comes next<a class="anchor" aria-label="anchor" href="#what-comes-next"></a>
+<h2 id="further-reading">Further reading<a class="anchor" aria-label="anchor" href="#further-reading"></a>
 </h2>
 <ul>
 <li>
 <code><a href="../articles/phase-based-fc.html">vignette("phase-based-fc")</a></code> — Hilbert transform, LEiDA,
-and the Kuramoto order parameter in depth</li>
+K-means, and the Kuramoto order parameter in depth</li>
 <li>
-<code><a href="../articles/sliding-window-fc.html">vignette("sliding-window-fc")</a></code> — sliding-window
-correlation and edge-centric cofluctuations</li>
-<li>Passing <code>dpl$leida</code> to <code><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans()</a></code> and
-<code>stateR</code> for brain state quantification</li>
+<code><a href="../articles/sliding-window-fc.html">vignette("sliding-window-fc")</a></code> — window length
+trade-offs, edge cofluctuations, and FC recurrence</li>
+<li>
+<a href="https://github.com/CoDe-Neuro/stateR" class="external-link"><code>stateR</code></a> —
+downstream brain state metrics</li>
 </ul>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Faskowitz, J. et al. (2020). Edge-centric functional network
+representations of human cerebral cortex reveal overlapping system-level
+architecture. <em>Nature Neuroscience</em>, 23(12), 1644–1654. <a href="https://doi.org/10.1038/s41593-020-00719-y" class="external-link uri">https://doi.org/10.1038/s41593-020-00719-y</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

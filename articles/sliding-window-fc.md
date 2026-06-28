@@ -6,7 +6,7 @@ Correlation-based dynFC methods characterise how functional connectivity
 evolves over time by either **windowing** the timeseries into short
 segments and computing Pearson correlations within each window, or by
 analysing the **instantaneous co-activation** of parcel pairs as a
-continuous edge time series.
+continuous edge time series — no windowing required.
 
 `dynR` implements three correlation-based functions:
 
@@ -21,7 +21,7 @@ N × N × windows
 n\_edges × Tmax
 ```
  + RSS | Edge-centric cofluctuation |
-| [`corr_corr()`](https://CoDe-Neuro.github.io/dynR/reference/corr_corr.md) | Correlation-of-correlations 
+| [`corr_corr()`](https://CoDe-Neuro.github.io/dynR/reference/corr_corr.md) | FC recurrence matrix 
 ``` math
 Tmax × Tmax
 ``` | Hansen et al. (2015) |
@@ -30,33 +30,58 @@ Tmax × Tmax
 
 ## Sliding-window correlation
 
-[`corr_slide()`](https://CoDe-Neuro.github.io/dynR/reference/corr_slide.md)
-divides the timeseries into overlapping or non-overlapping windows and
-computes the Pearson FC matrix within each one. The choice of window
-length is a key parameter: too short and the estimate is noisy; too long
-and rapid transitions are blurred.
+### Window length: a critical choice
+
+Unlike phase-based methods, sliding-window FC requires you to commit to
+a window length. The trade-off is fundamental:
+
+- **Short windows** (\< 30 TRs): high temporal resolution, but FC
+  estimates are noisy — reliable Pearson correlations require sufficient
+  timepoints relative to the number of parcels.
+- **Long windows** (\> 60 TRs): stable, low-noise FC estimates, but
+  rapid state transitions are averaged away.
+- **Typical choice**: **30–60 TRs** (60–120 s for TR = 2 s), with step
+  size of 1 TR for fine temporal resolution or larger steps for
+  efficiency (Hutchison et al., 2013; Leonardi & Van De Ville, 2015).
+
+For this dataset (TR = 2 s, 600 timepoints), a few window choices look
+like:
 
 ``` r
 
-# 30-timepoint windows, step of 5 (overlapping)
-sw <- corr_slide(ts, window = 30, step = 5)
+TRs <- c(20, 30, 45, 60)
+data.frame(
+  `Window (TRs)` = TRs,
+  `Duration (s)` = TRs * 2,
+  `N windows (step = 5)` = floor((600 - TRs) / 5) + 1L,
+  check.names = FALSE
+)
+#>   Window (TRs) Duration (s) N windows (step = 5)
+#> 1           20           40                  117
+#> 2           30           60                  115
+#> 3           45           90                  112
+#> 4           60          120                  109
+```
 
-cat("Window size: 30 timepoints\n")
-#> Window size: 30 timepoints
-cat("Step:        5 timepoints\n")
-#> Step:        5 timepoints
-cat("N windows:  ", dim(sw$corr_mats)[3], "\n")
-#> N windows:   115
+``` r
+
+sw <- corr_slide(ts, window = 30, step = 5)
+cat("Window:    30 TRs (60 s at TR = 2 s)\n")
+#> Window:    30 TRs (60 s at TR = 2 s)
+cat("Step:       5 TRs (10 s)\n")
+#> Step:       5 TRs (10 s)
+cat("N windows:", dim(sw$corr_mats)[3], "\n")
+#> N windows: 115
 ```
 
 ### Validating against static FC
 
-When `window = ncol(ts)` the single window is the full timeseries, so
-the result must equal the static FC matrix.
+A single window spanning the full timeseries must recover the static FC
+matrix exactly.
 
 ``` r
 
-full <- corr_slide(ts, window = ncol(ts))
+full     <- corr_slide(ts, window = ncol(ts))
 max_diff <- max(abs(full$corr_mats[, , 1] - fc))
 cat("Max deviation from static FC:", formatC(max_diff, format = "e"), "\n")
 #> Max deviation from static FC: 8.8818e-16
@@ -64,33 +89,40 @@ cat("Max deviation from static FC:", formatC(max_diff, format = "e"), "\n")
 
 ### FC variability across windows
 
-A useful summary is how much the inter-parcel correlations vary across
-windows. High variability means the connectivity structure is genuinely
-non-stationary.
+The standard deviation of each edge across windows — its *FC
+variability* — reveals which connections drive the dynamic signal. Edges
+with high variability are the ones that genuinely fluctuate; edges with
+near-zero variability are essentially static.
 
 ``` r
 
-# Upper triangle indices (excluding diagonal)
-n_parcels <- dim(sw$corr_mats)[1]
-ut <- which(upper.tri(diag(n_parcels)), arr.ind = TRUE)
-
-# Extract upper triangle for each window → [n_edges x n_windows] matrix
+n_parcels      <- dim(sw$corr_mats)[1]
+ut             <- which(upper.tri(diag(n_parcels)), arr.ind = TRUE)
 edge_by_window <- apply(sw$corr_mats, 3, function(m) m[ut])
+edge_sd        <- apply(edge_by_window, 1, sd)
 
-# Mean standard deviation across edges
-mean_sd <- mean(apply(edge_by_window, 1, sd))
-cat("Mean edge SD across windows:", round(mean_sd, 4), "\n")
-#> Mean edge SD across windows: 0.5091
+ggplot(data.frame(sd = edge_sd), aes(x = sd)) +
+  geom_histogram(bins = 60, fill = "#8D9FD7", colour = "#341C5D",
+                 linewidth = 0.3) +
+  geom_vline(xintercept = mean(edge_sd),
+             colour = "#9E3C30", linetype = "dashed", linewidth = 0.9) +
+  labs(x = "SD across windows", y = "Number of edges",
+       title = "FC variability distribution",
+       subtitle = paste0("Mean edge SD = ", round(mean(edge_sd), 4))) +
+  theme_minimal(base_size = 13) +
+  theme(panel.grid.minor = element_blank())
 ```
+
+![](sliding-window-fc_files/figure-html/sw-variability-1.png)
 
 ------------------------------------------------------------------------
 
 ## Edge-centric cofluctuations
 
 The edge-centric framework (Esfahlani et al., 2020; Faskowitz et al.,
-2020) does not window the data at all. Instead, it z-scores each
-parcel’s timeseries and computes the element-wise product for every
-unique parcel pair:
+2020) abandons the window entirely. Instead, each parcel’s timeseries is
+z-standardised and the element-wise product of every unique parcel pair
+is computed at every timepoint:
 
 ``` math
 \text{ets}_{ij}(t) = z_i(t) \cdot z_j(t)
@@ -101,10 +133,9 @@ estimate of co-activation for every pair.
 
 ``` r
 
-ec <- cofluct(ts)
-
+ec      <- cofluct(ts)
 n_edges <- nrow(ec$edge_ts)
-cat("Edges (N*(N-1)/2):", n_edges, "\n")   # 200*199/2 = 19900
+cat("Edges (N*(N-1)/2):", n_edges, "\n")
 #> Edges (N*(N-1)/2): 19900
 cat("Timepoints:       ", ncol(ec$edge_ts), "\n")
 #> Timepoints:        600
@@ -112,108 +143,150 @@ cat("Timepoints:       ", ncol(ec$edge_ts), "\n")
 
 ### Root-sum-square (RSS) cofluctuation
 
-The RSS vector summarises the total cofluctuation amplitude at each
-timepoint:
+The RSS vector summarises the total co-activation amplitude across all
+edges at each timepoint:
 
 ``` math
 \text{RSS}(t) = \sqrt{\sum_{(i,j)} \text{ets}_{ij}(t)^2}
 ```
 
-High-RSS frames are moments of unusually strong co-activation across the
-brain and have been shown to drive the structure of the static FC matrix
-(Esfahlani et al., 2020).
+High-RSS frames are moments of unusually strong, synchronised
+co-activation across the whole brain. These **high-amplitude events**
+have been shown to disproportionately drive the structure of the static
+FC matrix — a small fraction of timepoints accounts for most of the
+long-run average connectivity (Esfahlani et al., 2020).
 
 ``` r
 
-plot(ec$rss, type = "l", col = "#1B6799",
-     xlab = "Timepoint", ylab = "RSS",
-     main = "Root-sum-square cofluctuation",
-     lwd = 1.2)
-abline(h = mean(ec$rss) + 2 * sd(ec$rss),
-       col = "#FC544A", lty = 2, lwd = 1.5)
-legend("topright", legend = "Mean + 2 SD",
-       col = "#FC544A", lty = 2, lwd = 1.5, bty = "n")
+thr    <- mean(ec$rss) + 2 * sd(ec$rss)
+df_rss <- data.frame(t = seq_along(ec$rss), rss = ec$rss,
+                     high = ec$rss > thr)
+
+ggplot(df_rss, aes(x = t, y = rss)) +
+  geom_line(colour = "#8D9FD7", linewidth = 0.6) +
+  geom_hline(yintercept = thr,
+             colour = "#9E3C30", linetype = "dashed", linewidth = 0.9) +
+  annotate("text",
+           x = max(df_rss$t) * 0.02, y = thr + 0.8,
+           label = paste0("Mean + 2 SD  (n = ",
+                          sum(df_rss$high), " frames)"),
+           colour = "#9E3C30", size = 3.5, hjust = 0) +
+  labs(x = "Timepoint", y = "RSS",
+       title = "Root-sum-square cofluctuation",
+       subtitle = paste0(round(mean(df_rss$high) * 100, 1),
+                         "% of timepoints exceed threshold")) +
+  theme_minimal(base_size = 13) +
+  theme(panel.grid.minor = element_blank())
 ```
 
 ![](sliding-window-fc_files/figure-html/rss-plot-1.png)
-
-### High-amplitude events
-
-Frames with RSS above mean + 2 SD are candidate **high-amplitude
-cofluctuation events** — the moments that most strongly shape static FC.
-
-``` r
-
-threshold  <- mean(ec$rss) + 2 * sd(ec$rss)
-high_frames <- which(ec$rss > threshold)
-cat("High-amplitude frames (RSS > mean + 2SD):", length(high_frames), "\n")
-#> High-amplitude frames (RSS > mean + 2SD): 20
-cat("Proportion of scan:", round(length(high_frames) / ncol(ts), 3), "\n")
-#> Proportion of scan: 0.033
-```
 
 ------------------------------------------------------------------------
 
 ## Correlation of correlations
 
 [`corr_corr()`](https://CoDe-Neuro.github.io/dynR/reference/corr_corr.md)
-computes the full
+computes a
 ``` math
 Tmax × Tmax
 ```
-matrix of pairwise correlations between edge time series (Hansen et al.,
-2015). Entry *(t1, t2)* reflects how similar the co-activation patterns
-were at timepoints *t1* and *t2* — a non-windowed measure of FC
-recurrence.
+matrix of pairwise correlations between edge time series. Entry (*t*1,
+*t*2) answers: **how similar was the brain’s whole-network co-activation
+pattern at timepoint *t*1 to that at *t*2?**
+
+This makes it a **temporal recurrence matrix** — a fingerprint of how
+often the brain revisits similar FC configurations. Key features to look
+for:
+
+- **Bright off-diagonal blocks**: the brain revisiting similar
+  co-activation states at different times.
+- **Diagonal block structure**: sustained states that persist over
+  consecutive timepoints.
+- **Sparse, diffuse structure**: rapidly shifting, non-recurrent
+  dynamics.
 
 ``` r
 
 cc <- corr_corr(ts)
-dim(cc)   # [600 x 600]
-#> [1] 600 600
+cat("Dimensions:", nrow(cc), "×", ncol(cc), "\n")
+#> Dimensions: 600 × 600
 ```
-
-The matrix is symmetric by construction and has ones on the diagonal.
 
 ``` r
 
-cat("Symmetric:   ", isTRUE(all.equal(cc, t(cc))), "\n")
-#> Symmetric:    TRUE
-cat("Diagonal == 1:", all(abs(diag(cc) - 1) < 1e-10), "\n")
-#> Diagonal == 1: TRUE
+pal <- colorRampPalette(c("#341C5D", "#E8ECF8", "#9E3C30"))(256)
+par(mar = c(4, 4, 3, 2))
+image(seq_len(nrow(cc)), seq_len(ncol(cc)), cc,
+      col  = pal,
+      xlab = "Timepoint", ylab = "Timepoint",
+      main = "FC recurrence (correlation of correlations)")
 ```
+
+![](sliding-window-fc_files/figure-html/cc-plot-1.png)
+
+Warm colours indicate timepoints where the brain was in similar
+connectivity configurations; cool colours indicate dissimilar states.
+Visible block structure along the diagonal suggests sustained, recurring
+FC patterns.
 
 ------------------------------------------------------------------------
 
-## Preparing for brain state analysis
+## Brain state analysis from sliding-window FC
 
-Both sliding-window FC and the correlation-of-correlations matrix can be
-used for K-means brain state discovery. The standard approach with
-sliding-window FC is to vectorise the upper triangle of each window’s FC
-matrix and cluster the resulting feature vectors:
+The upper triangle of each window’s FC matrix can be vectorised and
+clustered with K-means to identify recurring connectivity states.
 
 ``` r
 
-# Vectorise upper triangle for each window
-ut       <- which(upper.tri(diag(n_parcels)), arr.ind = TRUE)
 features <- t(apply(sw$corr_mats, 3, function(m) m[ut]))
-# features: [n_windows x n_edges]
 
 set.seed(42)
 K  <- 5
-km <- kmeans(features, centers = K, nstart = 50, iter.max = 500)
-table(km$cluster)
-#> 
-#>  1  2  3  4  5 
-#> 16 50 14 11 24
+km <- kmeans(features, centers = K, nstart = 100, iter.max = 500)
 ```
 
-The state sequence can then be passed to `stateR` for fractional
+Note on dimensionality: each feature vector has *N(N−1)/2* entries —
+19,900 for 200 parcels. This high dimensionality makes K-means
+convergence slower and noisier than in the LEiDA case, where each
+feature vector has only *N* entries. For smaller datasets or
+single-subject analyses, the LEiDA approach (see
+[`vignette("phase-based-fc")`](https://CoDe-Neuro.github.io/dynR/articles/phase-based-fc.md))
+is often preferable.
+
+``` r
+
+state_cols <- c("#8D9FD7", "#9E3C30", "#754D71", "#341C5D", "#E19A8F")
+
+ggplot(data.frame(t     = seq_along(km$cluster),
+                  state = factor(km$cluster)),
+       aes(x = t, y = 1, fill = state)) +
+  geom_tile(height = 1) +
+  scale_fill_manual(values = state_cols, name = "State") +
+  labs(x = "Window", y = NULL,
+       title = "Sliding-window brain state sequence (K = 5)") +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.y  = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid   = element_blank())
+```
+
+![](sliding-window-fc_files/figure-html/sw-state-seq-1.png)
+
+The state sequence feeds directly into `stateR` for fractional
 occupancy, dwell time, and Markov transition analysis.
 
 ------------------------------------------------------------------------
 
 ## References
+
+Hutchison, R. M. et al. (2013). Dynamic functional connectivity:
+Promise, issues, and interpretations. *NeuroImage*, 80, 360–378.
+<https://doi.org/10.1016/j.neuroimage.2013.05.079>
+
+Leonardi, N. & Van De Ville, D. (2015). On spurious and real
+fluctuations of dynamic functional connectivity during rest.
+*NeuroImage*, 104, 430–436.
+<https://doi.org/10.1016/j.neuroimage.2014.09.007>
 
 Hansen, E. C. A. et al. (2015). Functional connectivity dynamics:
 Modeling the switching behavior of the resting state. *NeuroImage*, 105,
