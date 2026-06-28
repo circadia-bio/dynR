@@ -1,4 +1,4 @@
-# dynR
+# 🧠 dynR
 
 An R port of the Python [dynfc](https://github.com/LucasFranca/dynfc)
 library for computing **dynamic connectivity (dynFC)** representations
