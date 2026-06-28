@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>dynR — Dynamic Functional Connectivity for R • dynR</title>
+<title>dynR — Dynamic Connectivity for Neurophysiological Timeseries • dynR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -17,12 +17,12 @@
 <link href="deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="dynR — Dynamic Functional Connectivity for R">
-<meta name="description" content="An R package for dynamic functional connectivity analysis of BOLD fMRI timeseries. Implements sliding-window correlations, edge-centric cofluctuations, instantaneous phase-locking, LEiDA, and the Kuramoto order parameter. Part of the CoDe-Neuro Lab R ecosystem.
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="dynR — Dynamic Connectivity for Neurophysiological Timeseries">
+<meta name="description" content="An R port of the Python dynfc library for computing dynamic connectivity representations from multivariate neurophysiological timeseries, including BOLD fMRI, EEG, LFP, and related signals. Implements sliding-window correlations, edge-centric cofluctuations, instantaneous phase-locking, LEiDA, and the Kuramoto order parameter. Part of the Circadia Lab R ecosystem.
 ">
-<meta property="og:description" content="An R package for dynamic functional connectivity analysis of BOLD fMRI timeseries. Implements sliding-window correlations, edge-centric cofluctuations, instantaneous phase-locking, LEiDA, and the Kuramoto order parameter. Part of the CoDe-Neuro Lab R ecosystem.
+<meta property="og:description" content="An R port of the Python dynfc library for computing dynamic connectivity representations from multivariate neurophysiological timeseries, including BOLD fMRI, EEG, LFP, and related signals. Implements sliding-window correlations, edge-centric cofluctuations, instantaneous phase-locking, LEiDA, and the Kuramoto order parameter. Part of the Circadia Lab R ecosystem.
 ">
-<meta property="og:image" content="https://CoDe-Neuro.github.io/dynR/logo.svg">
+<meta property="og:image" content="https://dynr.circadia-lab.uk/logo.svg">
 <style>
   /* ── Navbar ── */
   .navbar {
@@ -139,7 +139,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CoDe-Neuro/dynR" aria-label="GitHub"><span class="fa fab fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/circadia-bio/dynR" aria-label="GitHub"><span class="fa fab fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -148,33 +148,30 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header">
-<img src="logo.svg" class="logo" alt=""><h1 id="dynr-">dynR <a class="anchor" aria-label="anchor" href="#dynr-"></a>
-</h1>
-</div>
-<p>An R package for <strong>dynamic functional connectivity (dynFC)</strong> analysis of BOLD fMRI timeseries — sliding-window correlations, edge-centric cofluctuations, instantaneous phase-locking, LEiDA leading eigenvectors, and the Kuramoto order parameter.</p>
-<p><a href="https://github.com/CoDe-Neuro/dynR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/CoDe-Neuro/dynR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R CMD CHECK"></a> <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <a href="https://www.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R-%E2%89%A54.1-276DC3.svg" alt="R"></a> <a href="https://github.com/CoDe-Neuro/dynR" class="external-link"><img src="https://img.shields.io/badge/version-0.1.0-lightgrey" alt="Version"></a></p>
+
+<p>An R port of the Python <a href="https://github.com/LucasFranca/dynfc" class="external-link">dynfc</a> library for computing <strong>dynamic connectivity (dynFC)</strong> representations from multivariate neurophysiological timeseries — BOLD fMRI, EEG, LFP, and related signals.</p>
+<p><a href="https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R CMD CHECK"></a> <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <a href="https://www.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R-%E2%89%A54.1-276DC3.svg" alt="R"></a> <a href="https://github.com/circadia-bio/dynR" class="external-link"><img src="https://img.shields.io/badge/version-0.1.0-lightgrey" alt="Version"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></p>
 <hr>
 <div class="section level2">
 <h2 id="open_book-what-is-dynr">📖 What is dynR?<a class="anchor" aria-label="anchor" href="#open_book-what-is-dynr"></a>
 </h2>
-<p><code>dynR</code> is the upstream dynamic FC computation layer in the CoDe-Neuro R ecosystem. It picks up preprocessed BOLD timeseries — typically from <a href="https://fmriprep.org" class="external-link">fMRIPrep</a> derivatives, or the output of <a href="https://github.com/circadia-bio/boldR" class="external-link"><code>boldR</code></a> — and transforms them into dynFC representations ready for brain state analysis in <a href="https://github.com/CoDe-Neuro/stateR" class="external-link"><code>stateR</code></a>.</p>
-<p><code>dynR</code> is a full R port of the Python <a href="https://github.com/LucasFranca/dynfc" class="external-link"><code>dynfc</code></a> package, motivated by reproducibility: R + <code>renv</code> provides a more stable long-term environment than Python dependency chains for research pipelines.</p>
+<p><code>dynR</code> computes dynFC representations from preprocessed multivariate timeseries, providing the upstream computation layer for dynamic connectivity analysis. It is a full R port of the Python <a href="https://github.com/LucasFranca/dynfc" class="external-link"><code>dynfc</code></a> library, motivated by reproducibility: R + <code>renv</code> provides a more stable long-term environment than Python dependency chains for research pipelines.</p>
+<p>Although the bundled example data and several vignettes use BOLD fMRI, all methods are applicable to any band-limited neurophysiological signal where phase relationships or pairwise correlations carry meaningful information — including <strong>EEG</strong>, <strong>LFP</strong>, and <strong>MEG</strong>.</p>
+<p>The outputs of <code>dynR</code> feed directly into <a href="https://github.com/CoDe-Neuro/stateR" class="external-link"><code>stateR</code></a> for brain state quantification (fractional occupancy, dwell time, Markov transitions).</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="repeat-pipeline-position">🔁 Pipeline position<a class="anchor" aria-label="anchor" href="#repeat-pipeline-position"></a>
 </h2>
-<pre><code>BOLD timeseries
-      │
-      ▼
-   dynR                 ← this package
+<pre><code>Multivariate timeseries  [N × Tmax]
+        │
+        ▼
+     dynR                 ← this package
   (dynFC representations)
-      │
-      ▼
-   stateR
+        │
+        ▼
+     stateR
   (brain state metrics: FO, dwell time, Markov transitions)</code></pre>
-<p><code>dynR</code> outputs are designed to feed directly into <code>stateR::nest_fo()</code>, <code>stateR::nest_dwell()</code>, and <code>stateR::clusters_markov()</code>.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -231,7 +228,7 @@
 </tr>
 <tr>
 <td><code><a href="reference/corr_corr.html">corr_corr()</a></code></td>
-<td>Correlation-of-correlations matrix</td>
+<td>Correlation-of-correlations (FC recurrence) matrix</td>
 </tr>
 </tbody>
 </table>
@@ -271,58 +268,44 @@
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CoDe-Neuro/dynR"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"circadia-bio/dynR"</span><span class="op">)</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="package-quick-example">📦 Quick example<a class="anchor" aria-label="anchor" href="#package-quick-example"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://CoDe-Neuro.github.io/dynR">dynR</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dynr.circadia-lab.uk">dynR</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Simulated BOLD: 80 parcels, 300 timepoints</span></span>
+<span><span class="co"># Simulated timeseries: 80 channels, 300 timepoints</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">ts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">80</span> <span class="op">*</span> <span class="fl">300</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">80</span>, ncol <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 1. Bandpass filter (TR = 2 s)</span></span>
+<span><span class="co"># 1. Bandpass filter (e.g. fMRI: TR = 2 s, 0.01–0.1 Hz)</span></span>
 <span><span class="va">ts_filt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">ts</span>, <span class="fl">1</span>, <span class="va">bandpass_filter</span>, flp <span class="op">=</span> <span class="fl">0.01</span>, fhi <span class="op">=</span> <span class="fl">0.1</span>, delt <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">ts_filt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 2. Extract instantaneous phases</span></span>
+<span><span class="co"># 2. Phase-based: LEiDA + Kuramoto</span></span>
 <span><span class="va">phases</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hilbert_phases.html">hilbert_phases</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span></span>
+<span><span class="va">dpl</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/dyn_phase_lock.html">dyn_phase_lock</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span>   <span class="co"># dpl$leida: [280 × 80] LEiDA eigenvectors</span></span>
+<span><span class="va">kop</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/kuramoto.html">kuramoto</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span>         <span class="co"># kop$metastability, kop$entropy</span></span>
 <span></span>
-<span><span class="co"># 3. Dynamic phase-locking + LEiDA eigenvectors</span></span>
-<span><span class="va">dpl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/dyn_phase_lock.html">dyn_phase_lock</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span></span>
-<span><span class="co"># dpl$sync_conn  — [80, 80, 280] array of phase-locking matrices</span></span>
-<span><span class="co"># dpl$leida      — [280, 80] matrix of leading eigenvectors</span></span>
-<span></span>
-<span><span class="co"># 4. Cluster LEiDA vectors (→ feed into stateR)</span></span>
+<span><span class="co"># 3. Cluster LEiDA vectors → feed into stateR</span></span>
 <span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span>, centers <span class="op">=</span> <span class="fl">5</span>, nstart <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
-<span><span class="co"># km$cluster is the state sequence for stateR</span></span>
 <span></span>
-<span><span class="co"># 5. Kuramoto order parameter</span></span>
-<span><span class="va">kop</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kuramoto.html">kuramoto</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span></span>
-<span><span class="va">kop</span><span class="op">$</span><span class="va">metastability</span></span>
-<span><span class="va">kop</span><span class="op">$</span><span class="va">entropy</span></span>
-<span></span>
-<span><span class="co"># 6. Sliding-window FC</span></span>
+<span><span class="co"># 4. Correlation-based: sliding-window FC + cofluctuations</span></span>
 <span><span class="va">sw</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/corr_slide.html">corr_slide</a></span><span class="op">(</span><span class="va">ts_filt</span>, window <span class="op">=</span> <span class="fl">30</span>, step <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sw</span><span class="op">$</span><span class="va">corr_mats</span><span class="op">)</span>  <span class="co"># 80 x 80 x n_windows</span></span>
-<span></span>
-<span><span class="co"># 7. Edge-centric cofluctuations</span></span>
-<span><span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cofluct.html">cofluct</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span></span>
-<span><span class="co"># ec$edge_ts — edge time series [n_edges x 300]</span></span>
-<span><span class="co"># ec$rss     — root-sum-square cofluctuation [300]</span></span></code></pre></div>
+<span><span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cofluct.html">cofluct</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span>             <span class="co"># ec$edge_ts, ec$rss</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="triangular_ruler-data-conventions">📐 Data conventions<a class="anchor" aria-label="anchor" href="#triangular_ruler-data-conventions"></a>
 </h2>
-<p>All timeseries inputs follow the convention:</p>
+<p>All timeseries inputs follow:</p>
 <blockquote>
-<p><strong>rows = parcels/voxels (N), columns = timepoints (Tmax)</strong></p>
+<p><strong>rows = channels/parcels (N), columns = timepoints (Tmax)</strong></p>
 </blockquote>
-<p>This matches the <code>[N, Tmax]</code> convention used in the original Python <code>dynfc</code> package.</p>
+<p>This matches the <code>[N, Tmax]</code> convention of the original Python <code>dynfc</code> package.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -343,7 +326,12 @@
 <tr>
 <td>Author, maintainer</td>
 <td>Lucas G. S. França</td>
-<td>Northumbria University / CoDe-Neuro Lab</td>
+<td>Northumbria University / Circadia Lab</td>
+</tr>
+<tr>
+<td>Author</td>
+<td>Mario Leocadio-Miguel</td>
+<td>Northumbria University / Circadia Lab</td>
 </tr>
 <tr>
 <td>Author</td>
@@ -352,32 +340,29 @@
 </tr>
 </tbody>
 </table>
-<p>Part of the <a href="https://github.com/CoDe-Neuro" class="external-link">CoDe-Neuro Lab</a> at King’s College London.</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="handshake-related-tools">🤝 Related tools<a class="anchor" aria-label="anchor" href="#handshake-related-tools"></a>
 </h2>
-<ul>
-<li>🧪 <a href="https://github.com/CoDe-Neuro/stateR" class="external-link"><strong>stateR</strong></a> — Brain state metrics (FO, dwell time, Markov) — consumes <code>dynR</code> output</li>
-<li>🔬 <a href="https://github.com/CoDe-Neuro/ptestR" class="external-link"><strong>ptestR</strong></a> — Permutation-based significance testing for <code>stateR</code> outputs</li>
-<li>🧲 <a href="https://github.com/circadia-bio/boldR" class="external-link"><strong>boldR</strong></a> — fMRI BOLD preprocessing and parcellation; feeds <code>dynR</code>
-</li>
-</ul>
+<p><strong>Circadia Lab ecosystem:</strong> - 🕐 <a href="https://github.com/circadia-bio/zeitR" class="external-link"><strong>zeitR</strong></a> — wrist actigraphy analysis - 😴 <a href="https://github.com/circadia-bio/hypnoR" class="external-link"><strong>hypnoR</strong></a> — hypnogram handling and sleep architecture - 🔗 <a href="https://github.com/circadia-bio/syncR" class="external-link"><strong>syncR</strong></a> — ecosystem integrator</p>
+<p><strong>CoDe-Neuro ecosystem:</strong> - 🧪 <a href="https://github.com/CoDe-Neuro/stateR" class="external-link"><strong>stateR</strong></a> — brain state metrics (FO, dwell time, Markov) — consumes <code>dynR</code> output - 🔬 <a href="https://github.com/CoDe-Neuro/ptestR" class="external-link"><strong>ptestR</strong></a> — permutation-based significance testing</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="page_facing_up-licence">📄 Licence<a class="anchor" aria-label="anchor" href="#page_facing_up-licence"></a>
 </h2>
-<p>MIT © 2026 Lucas G. S. França, Dafnis Batallé</p>
+<p>MIT © 2026 Lucas G. S. França, Mario Leocadio-Miguel, Dafnis Batallé</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/CoDe-Neuro/dynR/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/CoDe-Neuro/dynR/issues" class="external-link">Report a bug</a></li>
-<li><a href="https://github.com/CoDe-Neuro" class="external-link">CoDe-Neuro Lab</a></li>
+<li><a href="https://github.com/circadia-bio/dynR/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/circadia-bio/dynR/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link">🚧 This package is in active development — the API may change</a></li>
+<li><a href="https://github.com/circadia-bio" class="external-link">Circadia Lab</a></li>
+<li><a href="https://github.com/LucasFranca/dynfc" class="external-link">Python dynfc</a></li>
 </ul>
 </div>
 
@@ -403,6 +388,8 @@
 <li>
 <a href="https://orcid.org/0000-0003-0853-1319" class="external-link">Lucas França</a> <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0003-0853-1319" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>
+<a href="https://orcid.org/0000-0002-7248-3529" class="external-link">Mario Leocadio-Miguel</a> <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-7248-3529" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>
 <a href="https://orcid.org/0000-0003-2097-979X" class="external-link">Dafnis Batallé</a> <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0003-2097-979X" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
@@ -414,7 +401,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><strong>dynR</strong> — CoDe-Neuro Lab. Lucas França &amp; Dafnis Batallé.</p>
+  <p><strong>dynR</strong> — Circadia Lab. Lucas França, Mario Leocadio-Miguel &amp; Dafnis Batallé.</p>
 </div>
 
 <div class="pkgdown-footer-right">

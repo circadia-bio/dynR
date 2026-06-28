@@ -2,30 +2,35 @@
 
 ## Overview
 
-Phase-based dynFC methods characterise functional connectivity through
-the **instantaneous phase** of the BOLD signal. Rather than asking how
+Phase-based dynFC methods characterise connectivity through the
+**instantaneous phase** of the signal. Rather than asking how
 *correlated* two regions are over a window, they ask: are two regions
 **synchronised** at this exact moment — oscillating in phase, or in
 anti-phase?
 
 This perspective originates in the physics of coupled oscillators. Each
-parcel’s BOLD timeseries, once bandpass-filtered to a specific frequency
-band, behaves like a noisy oscillator. The Hilbert transform extracts
-the instantaneous phase of that oscillation at every timepoint. Two
-parcels are phase-locked when their phases move together; they are in
-anti-phase synchrony when their phases are consistently offset by π
+channel’s timeseries, once bandpass-filtered to a frequency band of
+interest, behaves like a noisy oscillator. The Hilbert transform
+extracts the instantaneous phase of that oscillation at every timepoint.
+Two channels are phase-locked when their phases move together; they are
+in anti-phase synchrony when their phases are consistently offset by π
 radians.
+
+Although this vignette uses BOLD fMRI data and refers to parcels and TR
+throughout, the same methods apply to any band-limited
+neurophysiological signal — including EEG narrow-band epochs, LFP, and
+MEG.
 
 `dynR` implements three phase-based methods:
 
 | Function | Output | Method |
 |----|----|----|
-| [`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md) | Instantaneous phases 
+| [`hilbert_phases()`](https://dynr.circadia-lab.uk/reference/hilbert_phases.md) | Instantaneous phases 
 ``` math
 N × Tmax
 ``` | Hilbert transform |
-| [`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md) | Phase-locking matrices + LEiDA vectors | dPL / LEiDA |
-| [`kuramoto()`](https://CoDe-Neuro.github.io/dynR/reference/kuramoto.md) | Synchrony, metastability, entropy | Kuramoto order parameter |
+| [`dyn_phase_lock()`](https://dynr.circadia-lab.uk/reference/dyn_phase_lock.md) | Phase-locking matrices + LEiDA vectors | dPL / LEiDA |
+| [`kuramoto()`](https://dynr.circadia-lab.uk/reference/kuramoto.md) | Synchrony, metastability, entropy | Kuramoto order parameter |
 
 ------------------------------------------------------------------------
 
@@ -64,7 +69,7 @@ convention expected by downstream functions.
 
 ## Step 2: Instantaneous phases via the Hilbert transform
 
-[`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md)
+[`hilbert_phases()`](https://dynr.circadia-lab.uk/reference/hilbert_phases.md)
 constructs the **analytic signal** for each parcel — a complex-valued
 representation whose argument gives the instantaneous phase angle at
 every timepoint.
@@ -87,7 +92,7 @@ Each row is a parcel; each column is a timepoint. Values are in radians.
 ### The dPL matrix
 
 At each timepoint *t*,
-[`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md)
+[`dyn_phase_lock()`](https://dynr.circadia-lab.uk/reference/dyn_phase_lock.md)
 constructs an *N* × *N* **phase-locking matrix**:
 
 ``` math
@@ -144,23 +149,11 @@ phase-locking patterns. K-means is the standard choice (Cabral et al.,
 
 ### Choosing K
 
-There is no universal rule for K. In practice:
-
-- **K = 2–3** captures coarse global organisation (e.g. default mode vs.
-  task-positive network).
-- **K = 5–10** resolves finer network-level distinctions commonly seen
-  in resting-state data.
-- **K \> 15** risks overfitting to session-specific noise without adding
-  interpretable new states.
-
-A common approach is to sweep over a range of K values, compute a
-stability metric (silhouette coefficient or variance explained), and
-select the K at which additional states no longer yield coherent new
-patterns. For a single scan, **K = 5** is a reasonable starting point.
-
-The `nstart` argument is critical: K-means is sensitive to
-initialisation, so running many random restarts and keeping the best
-solution is essential.
+There is no universal rule for K. Typical choices in resting-state
+research range from 2–3 (coarse global organisation) to 5–10 (finer
+network distinctions). The `nstart` argument is critical — K-means is
+sensitive to initialisation, so running many random restarts and keeping
+the best solution is essential.
 
 ``` r
 

@@ -1,7 +1,7 @@
 # Functional connectivity matrix (200 parcels)
 
 Static functional connectivity matrix derived from
-[ts](https://CoDe-Neuro.github.io/dynR/reference/ts.md) by computing the
+[ts](https://dynr.circadia-lab.uk/reference/ts.md) by computing the
 full-timeseries Pearson correlation across all 200 parcel pairs. Serves
 as a ground-truth reference for validating sliding-window and
 phase-based dynFC methods when the window spans the full timeseries.
@@ -19,4 +19,4 @@ off-diagonal values are Pearson correlations in \[-1, 1\].
 
 ## Source
 
-Derived from [ts](https://CoDe-Neuro.github.io/dynR/reference/ts.md).
+Derived from [ts](https://dynr.circadia-lab.uk/reference/ts.md).

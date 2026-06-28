@@ -4,16 +4,16 @@
 
 Example datasets bundled with dynR.
 
-- [`ts`](https://CoDe-Neuro.github.io/dynR/reference/ts.md) : BOLD fMRI
+- [`ts`](https://dynr.circadia-lab.uk/reference/ts.md) : BOLD fMRI
   timeseries (200 parcels, 600 timepoints)
-- [`fc`](https://CoDe-Neuro.github.io/dynR/reference/fc.md) : Functional
+- [`fc`](https://dynr.circadia-lab.uk/reference/fc.md) : Functional
   connectivity matrix (200 parcels)
 
 ## Signal preprocessing
 
 Filter and prepare BOLD timeseries prior to dynFC analysis.
 
-- [`bandpass_filter()`](https://CoDe-Neuro.github.io/dynR/reference/bandpass_filter.md)
+- [`bandpass_filter()`](https://dynr.circadia-lab.uk/reference/bandpass_filter.md)
   : Butterworth bandpass filter
 
 ## Phase-based methods
@@ -21,31 +21,31 @@ Filter and prepare BOLD timeseries prior to dynFC analysis.
 Instantaneous phase extraction, phase-locking, and Kuramoto order
 parameter.
 
-- [`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md)
+- [`hilbert_phases()`](https://dynr.circadia-lab.uk/reference/hilbert_phases.md)
   : Hilbert transform phase extraction
-- [`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md)
+- [`dyn_phase_lock()`](https://dynr.circadia-lab.uk/reference/dyn_phase_lock.md)
   : Dynamic phase-locking matrix (dPL)
-- [`get_leida()`](https://CoDe-Neuro.github.io/dynR/reference/get_leida.md)
-  : Leading eigenvector decomposition (LEiDA)
-- [`kuramoto()`](https://CoDe-Neuro.github.io/dynR/reference/kuramoto.md)
-  : Kuramoto order parameter and metastability
+- [`get_leida()`](https://dynr.circadia-lab.uk/reference/get_leida.md) :
+  Leading eigenvector decomposition (LEiDA)
+- [`kuramoto()`](https://dynr.circadia-lab.uk/reference/kuramoto.md) :
+  Kuramoto order parameter and metastability
 
 ## Correlation-based methods
 
 Sliding-window FC and edge-centric cofluctuation.
 
-- [`corr_slide()`](https://CoDe-Neuro.github.io/dynR/reference/corr_slide.md)
+- [`corr_slide()`](https://dynr.circadia-lab.uk/reference/corr_slide.md)
   : Sliding window correlation
-- [`cofluct()`](https://CoDe-Neuro.github.io/dynR/reference/cofluct.md)
-  : Edge-centric cofluctuation analysis
-- [`corr_corr()`](https://CoDe-Neuro.github.io/dynR/reference/corr_corr.md)
-  : Correlation of correlations matrix
+- [`cofluct()`](https://dynr.circadia-lab.uk/reference/cofluct.md) :
+  Edge-centric cofluctuation analysis
+- [`corr_corr()`](https://dynr.circadia-lab.uk/reference/corr_corr.md) :
+  Correlation of correlations matrix
 
 ## Utilities
 
 Entropy and distance helpers.
 
-- [`shannon_entropy()`](https://CoDe-Neuro.github.io/dynR/reference/shannon_entropy.md)
+- [`shannon_entropy()`](https://dynr.circadia-lab.uk/reference/shannon_entropy.md)
   : Shannon entropy
-- [`do_euclid()`](https://CoDe-Neuro.github.io/dynR/reference/do_euclid.md)
-  : Euclidean distance between consecutive points
+- [`do_euclid()`](https://dynr.circadia-lab.uk/reference/do_euclid.md) :
+  Euclidean distance between consecutive points

@@ -19,7 +19,7 @@ corr_corr(timeseries, k = 1)
 - k:
 
   Integer. Upper-triangle offset passed to
-  [`cofluct()`](https://CoDe-Neuro.github.io/dynR/reference/cofluct.md).
+  [`cofluct()`](https://dynr.circadia-lab.uk/reference/cofluct.md).
   Default 1.
 
 ## Value

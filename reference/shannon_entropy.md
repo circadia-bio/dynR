@@ -2,7 +2,7 @@
 
 Estimate Shannon entropy from a numeric vector, with optional bit-depth
 discretisation (as used internally by
-[`kuramoto()`](https://CoDe-Neuro.github.io/dynR/reference/kuramoto.md)).
+[`kuramoto()`](https://dynr.circadia-lab.uk/reference/kuramoto.md)).
 
 ## Usage
 

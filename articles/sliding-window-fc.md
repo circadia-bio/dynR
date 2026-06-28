@@ -12,19 +12,23 @@ continuous edge time series — no windowing required.
 
 | Function | Output | Method |
 |----|----|----|
-| [`corr_slide()`](https://CoDe-Neuro.github.io/dynR/reference/corr_slide.md) | FC matrices 
+| [`corr_slide()`](https://dynr.circadia-lab.uk/reference/corr_slide.md) | FC matrices 
 ``` math
 N × N × windows
 ``` | Sliding-window Pearson correlation |
-| [`cofluct()`](https://CoDe-Neuro.github.io/dynR/reference/cofluct.md) | Edge time series 
+| [`cofluct()`](https://dynr.circadia-lab.uk/reference/cofluct.md) | Edge time series 
 ``` math
 n\_edges × Tmax
 ```
  + RSS | Edge-centric cofluctuation |
-| [`corr_corr()`](https://CoDe-Neuro.github.io/dynR/reference/corr_corr.md) | FC recurrence matrix 
+| [`corr_corr()`](https://dynr.circadia-lab.uk/reference/corr_corr.md) | FC recurrence matrix 
 ``` math
 Tmax × Tmax
 ``` | Hansen et al. (2015) |
+
+Although this vignette uses BOLD fMRI data throughout, these methods
+apply to any multivariate timeseries where pairwise correlations carry
+meaningful information, including EEG and LFP.
 
 ------------------------------------------------------------------------
 
@@ -185,7 +189,7 @@ ggplot(df_rss, aes(x = t, y = rss)) +
 
 ## Correlation of correlations
 
-[`corr_corr()`](https://CoDe-Neuro.github.io/dynR/reference/corr_corr.md)
+[`corr_corr()`](https://dynr.circadia-lab.uk/reference/corr_corr.md)
 computes a
 ``` math
 Tmax × Tmax
@@ -250,7 +254,7 @@ Note on dimensionality: each feature vector has *N(N−1)/2* entries —
 convergence slower and noisier than in the LEiDA case, where each
 feature vector has only *N* entries. For smaller datasets or
 single-subject analyses, the LEiDA approach (see
-[`vignette("phase-based-fc")`](https://CoDe-Neuro.github.io/dynR/articles/phase-based-fc.md))
+[`vignette("phase-based-fc")`](https://dynr.circadia-lab.uk/articles/phase-based-fc.md))
 is often preferable.
 
 ``` r

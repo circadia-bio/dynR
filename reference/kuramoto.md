@@ -4,7 +4,7 @@ Compute the global Kuramoto order parameter time series, the
 metastability index (standard deviation of the order parameter), and
 Shannon entropy of synchrony from parcel-level instantaneous phase time
 series. The first and last 10 timepoints are discarded (matching
-[`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md)).
+[`dyn_phase_lock()`](https://dynr.circadia-lab.uk/reference/dyn_phase_lock.md)).
 
 ## Usage
 
@@ -18,7 +18,7 @@ kuramoto(phases, base = 2, n_bits = 8L)
 
   Numeric matrix \[N × Tmax\]. Instantaneous phases in radians, as
   returned by
-  [`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md).
+  [`hilbert_phases()`](https://dynr.circadia-lab.uk/reference/hilbert_phases.md).
 
 - base:
 

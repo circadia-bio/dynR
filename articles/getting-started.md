@@ -13,13 +13,13 @@ seriously. It asks: does the pattern of co-activation between brain
 regions shift during a scan, and can those shifts tell us something
 about cognition, clinical state, or neural mechanisms?
 
-`dynR` computes dynFC representations from preprocessed BOLD timeseries,
-implementing two complementary families of methods:
+`dynR` computes dynFC representations from preprocessed multivariate
+timeseries, implementing two complementary families of methods:
 
 | Family | Core functions | What it captures |
 |----|----|----|
-| **Phase-based** | [`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md), [`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md), [`kuramoto()`](https://CoDe-Neuro.github.io/dynR/reference/kuramoto.md) | Instantaneous synchrony via the analytic signal |
-| **Correlation-based** | [`corr_slide()`](https://CoDe-Neuro.github.io/dynR/reference/corr_slide.md), [`cofluct()`](https://CoDe-Neuro.github.io/dynR/reference/cofluct.md), [`corr_corr()`](https://CoDe-Neuro.github.io/dynR/reference/corr_corr.md) | Windowed co-activation and edge dynamics |
+| **Phase-based** | [`hilbert_phases()`](https://dynr.circadia-lab.uk/reference/hilbert_phases.md), [`dyn_phase_lock()`](https://dynr.circadia-lab.uk/reference/dyn_phase_lock.md), [`kuramoto()`](https://dynr.circadia-lab.uk/reference/kuramoto.md) | Instantaneous synchrony via the analytic signal |
+| **Correlation-based** | [`corr_slide()`](https://dynr.circadia-lab.uk/reference/corr_slide.md), [`cofluct()`](https://dynr.circadia-lab.uk/reference/cofluct.md), [`corr_corr()`](https://dynr.circadia-lab.uk/reference/corr_corr.md) | Windowed co-activation and edge dynamics |
 
 Both families produce outputs that feed directly into
 [`stateR`](https://github.com/CoDe-Neuro/stateR) for brain state
@@ -49,10 +49,12 @@ task structure or behavioural events.
 
 ## Package data
 
-`dynR` ships with a resting-state BOLD timeseries from the
+`dynR` ships with a resting-state BOLD fMRI timeseries from the
 [edge-ts](https://github.com/brain-networks/edge-ts) repository
 (Faskowitz et al., 2020), parcellated into 200 regions of interest. This
-dataset is used throughout all three vignettes.
+dataset is used throughout all three vignettes. The methods themselves
+are not restricted to fMRI — they apply equally to EEG, LFP, or any
+band-limited neurophysiological signal.
 
 ``` r
 
@@ -181,10 +183,10 @@ cat("Max deviation from static FC:", formatC(max_diff, format = "e"), "\n")
 
 ## Further reading
 
-- [`vignette("phase-based-fc")`](https://CoDe-Neuro.github.io/dynR/articles/phase-based-fc.md)
+- [`vignette("phase-based-fc")`](https://dynr.circadia-lab.uk/articles/phase-based-fc.md)
   — Hilbert transform, LEiDA, K-means, and the Kuramoto order parameter
   in depth
-- [`vignette("sliding-window-fc")`](https://CoDe-Neuro.github.io/dynR/articles/sliding-window-fc.md)
+- [`vignette("sliding-window-fc")`](https://dynr.circadia-lab.uk/articles/sliding-window-fc.md)
   — window length trade-offs, edge cofluctuations, and FC recurrence
 - [`stateR`](https://github.com/CoDe-Neuro/stateR) — downstream brain
   state metrics

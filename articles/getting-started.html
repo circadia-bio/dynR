@@ -134,7 +134,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CoDe-Neuro/dynR" aria-label="GitHub"><span class="fa fab fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/circadia-bio/dynR" aria-label="GitHub"><span class="fa fab fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -150,7 +150,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Getting started with dynR</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/CoDe-Neuro/dynR/blob/main/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/main/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
       <div class="d-none name"><code>getting-started.Rmd</code></div>
     </div>
 
@@ -169,7 +169,8 @@ time dimension seriously. It asks: does the pattern of co-activation
 between brain regions shift during a scan, and can those shifts tell us
 something about cognition, clinical state, or neural mechanisms?</p>
 <p><code>dynR</code> computes dynFC representations from preprocessed
-BOLD timeseries, implementing two complementary families of methods:</p>
+multivariate timeseries, implementing two complementary families of
+methods:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -256,10 +257,12 @@ events.</p>
 <div class="section level2">
 <h2 id="package-data">Package data<a class="anchor" aria-label="anchor" href="#package-data"></a>
 </h2>
-<p><code>dynR</code> ships with a resting-state BOLD timeseries from the
-<a href="https://github.com/brain-networks/edge-ts" class="external-link">edge-ts</a>
+<p><code>dynR</code> ships with a resting-state BOLD fMRI timeseries
+from the <a href="https://github.com/brain-networks/edge-ts" class="external-link">edge-ts</a>
 repository (Faskowitz et al., 2020), parcellated into 200 regions of
-interest. This dataset is used throughout all three vignettes.</p>
+interest. This dataset is used throughout all three vignettes. The
+methods themselves are not restricted to fMRI — they apply equally to
+EEG, LFP, or any band-limited neurophysiological signal.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ts</span><span class="op">)</span>   <span class="co"># [200 × 600] BOLD timeseries</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span>   <span class="co"># [200 × 200] static FC matrix (ground truth)</span></span>
@@ -397,7 +400,7 @@ architecture. <em>Nature Neuroscience</em>, 23(12), 1644–1654. <a href="https:
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><strong>dynR</strong> — CoDe-Neuro Lab. Lucas França &amp; Dafnis Batallé.</p>
+  <p><strong>dynR</strong> — Circadia Lab. Lucas França, Mario Leocadio-Miguel &amp; Dafnis Batallé.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -134,7 +134,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CoDe-Neuro/dynR" aria-label="GitHub"><span class="fa fab fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/circadia-bio/dynR" aria-label="GitHub"><span class="fa fab fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -150,7 +150,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Phase-based dynamic FC: Hilbert transform, LEiDA, and Kuramoto</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/CoDe-Neuro/dynR/blob/main/vignettes/phase-based-fc.Rmd" class="external-link"><code>vignettes/phase-based-fc.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/main/vignettes/phase-based-fc.Rmd" class="external-link"><code>vignettes/phase-based-fc.Rmd</code></a></small>
       <div class="d-none name"><code>phase-based-fc.Rmd</code></div>
     </div>
 
@@ -159,18 +159,22 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>Phase-based dynFC methods characterise functional connectivity
-through the <strong>instantaneous phase</strong> of the BOLD signal.
-Rather than asking how <em>correlated</em> two regions are over a
-window, they ask: are two regions <strong>synchronised</strong> at this
-exact moment — oscillating in phase, or in anti-phase?</p>
+<p>Phase-based dynFC methods characterise connectivity through the
+<strong>instantaneous phase</strong> of the signal. Rather than asking
+how <em>correlated</em> two regions are over a window, they ask: are two
+regions <strong>synchronised</strong> at this exact moment — oscillating
+in phase, or in anti-phase?</p>
 <p>This perspective originates in the physics of coupled oscillators.
-Each parcel’s BOLD timeseries, once bandpass-filtered to a specific
-frequency band, behaves like a noisy oscillator. The Hilbert transform
+Each channel’s timeseries, once bandpass-filtered to a frequency band of
+interest, behaves like a noisy oscillator. The Hilbert transform
 extracts the instantaneous phase of that oscillation at every timepoint.
-Two parcels are phase-locked when their phases move together; they are
+Two channels are phase-locked when their phases move together; they are
 in anti-phase synchrony when their phases are consistently offset by π
 radians.</p>
+<p>Although this vignette uses BOLD fMRI data and refers to parcels and
+TR throughout, the same methods apply to any band-limited
+neurophysiological signal — including EEG narrow-band epochs, LFP, and
+MEG.</p>
 <p><code>dynR</code> implements three phase-based methods:</p>
 <table class="table">
 <colgroup>
@@ -302,26 +306,11 @@ phase-locking patterns. K-means is the standard choice (Cabral et al.,
 <div class="section level3">
 <h3 id="choosing-k">Choosing K<a class="anchor" aria-label="anchor" href="#choosing-k"></a>
 </h3>
-<p>There is no universal rule for K. In practice:</p>
-<ul>
-<li>
-<strong>K = 2–3</strong> captures coarse global organisation
-(e.g. default mode vs. task-positive network).</li>
-<li>
-<strong>K = 5–10</strong> resolves finer network-level distinctions
-commonly seen in resting-state data.</li>
-<li>
-<strong>K &gt; 15</strong> risks overfitting to session-specific
-noise without adding interpretable new states.</li>
-</ul>
-<p>A common approach is to sweep over a range of K values, compute a
-stability metric (silhouette coefficient or variance explained), and
-select the K at which additional states no longer yield coherent new
-patterns. For a single scan, <strong>K = 5</strong> is a reasonable
-starting point.</p>
-<p>The <code>nstart</code> argument is critical: K-means is sensitive to
-initialisation, so running many random restarts and keeping the best
-solution is essential.</p>
+<p>There is no universal rule for K. Typical choices in resting-state
+research range from 2–3 (coarse global organisation) to 5–10 (finer
+network distinctions). The <code>nstart</code> argument is critical —
+K-means is sensitive to initialisation, so running many random restarts
+and keeping the best solution is essential.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">K</span>  <span class="op">&lt;-</span> <span class="fl">5</span></span>
@@ -440,7 +429,7 @@ brain networks at rest is modulated by psilocybin. <em>NeuroImage</em>,
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><strong>dynR</strong> — CoDe-Neuro Lab. Lucas França &amp; Dafnis Batallé.</p>
+  <p><strong>dynR</strong> — Circadia Lab. Lucas França, Mario Leocadio-Miguel &amp; Dafnis Batallé.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -16,7 +16,7 @@ get_leida(sync_conn)
 
   Numeric array \[N, N, Tmax\]. Instantaneous phase-locking matrices, as
   returned by
-  [`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md).
+  [`dyn_phase_lock()`](https://dynr.circadia-lab.uk/reference/dyn_phase_lock.md).
 
 ## Value
 

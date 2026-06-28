@@ -2,7 +2,7 @@
 
 Compute instantaneous phase-locking matrices from parcel-level phase
 time series and extract leading eigenvectors via
-[`get_leida()`](https://CoDe-Neuro.github.io/dynR/reference/get_leida.md).
+[`get_leida()`](https://dynr.circadia-lab.uk/reference/get_leida.md).
 The first and last 10 timepoints are discarded to avoid edge effects
 from the Hilbert transform.
 
@@ -18,7 +18,7 @@ dyn_phase_lock(phases)
 
   Numeric matrix \[N × Tmax\]. Instantaneous phases in radians, as
   returned by
-  [`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md).
+  [`hilbert_phases()`](https://dynr.circadia-lab.uk/reference/hilbert_phases.md).
 
 ## Value
 
@@ -32,7 +32,7 @@ A list with:
 - leida:
 
   Matrix \[Tmax-20, N\]. Leading eigenvectors from
-  [`get_leida()`](https://CoDe-Neuro.github.io/dynR/reference/get_leida.md).
+  [`get_leida()`](https://dynr.circadia-lab.uk/reference/get_leida.md).
 
 ## References
 
