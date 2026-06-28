@@ -21,6 +21,7 @@ Description: Computes dynamic functional connectivity (dynFC) representations
     brain state metric quantification. Part of the CoDe-Neuro Lab R ecosystem.
 License: MIT + file LICENSE
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
 Depends:
