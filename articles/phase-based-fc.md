@@ -1,0 +1,216 @@
+# Phase-based dynamic FC: Hilbert transform, LEiDA, and Kuramoto
+
+## Overview
+
+Phase-based dynFC methods characterise functional connectivity through
+the **instantaneous phase** of the BOLD signal rather than its
+amplitude. The analytic signal (Hilbert transform) decomposes each
+parcel’s timeseries into a phase and an envelope, and the phase
+relationships across parcels carry information about transient
+synchronisation states.
+
+`dynR` implements three phase-based methods:
+
+| Function | Output | Method |
+|----|----|----|
+| [`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md) | Instantaneous phases 
+``` math
+N × Tmax
+``` | Hilbert transform |
+| [`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md) | Phase-locking matrices + LEiDA vectors | dPL / LEiDA |
+| [`kuramoto()`](https://CoDe-Neuro.github.io/dynR/reference/kuramoto.md) | Synchrony, metastability, entropy | Kuramoto order parameter |
+
+------------------------------------------------------------------------
+
+## Step 1: Bandpass filtering
+
+Before extracting phases, it is standard practice to bandpass filter the
+BOLD signal to the frequency range of interest. For resting-state fMRI
+with a TR of 2 s, the typical band is 0.01–0.1 Hz.
+
+``` r
+
+ts_filt <- apply(ts, 1, bandpass_filter,
+                 flp = 0.01, fhi = 0.1, delt = 2, order = 2)
+ts_filt <- t(ts_filt)   # restore [N x Tmax] orientation
+dim(ts_filt)
+#> [1] 200 600
+```
+
+The `apply` call filters each parcel (row) independently;
+[`t()`](https://rdrr.io/r/base/t.html) restores the
+``` math
+N × Tmax
+```
+convention expected by downstream functions.
+
+------------------------------------------------------------------------
+
+## Step 2: Instantaneous phases via the Hilbert transform
+
+[`hilbert_phases()`](https://CoDe-Neuro.github.io/dynR/reference/hilbert_phases.md)
+computes the analytic signal of each (demeaned) parcel timeseries and
+extracts the instantaneous phase angle.
+
+``` r
+
+phases <- hilbert_phases(ts_filt)
+dim(phases)   # [200 x 600]
+#> [1] 200 600
+range(phases) # in [-pi, pi]
+#> [1] -3.141541  3.141524
+```
+
+Each row is a parcel; each column is a timepoint. Values are in radians.
+
+------------------------------------------------------------------------
+
+## Step 3: Dynamic phase-locking matrix (dPL) and LEiDA
+
+For each timepoint *t*,
+[`dyn_phase_lock()`](https://CoDe-Neuro.github.io/dynR/reference/dyn_phase_lock.md)
+constructs an *N* × *N* **phase-locking matrix** whose entry *(i, j)*
+is:
+
+``` math
+\text{dPL}_{ij}(t) = \cos(\phi_i(t) - \phi_j(t))
+```
+
+where *φ* denotes instantaneous phase. A value near 1 indicates the two
+parcels are phase-locked; a value near −1 indicates anti-phase
+synchrony.
+
+The **leading eigenvector** (LEiDA) of each dPL matrix captures the
+dominant large-scale synchronisation pattern at that timepoint (Cabral
+et al., 2017). Ten timepoints are trimmed from each end to avoid Hilbert
+transform edge effects.
+
+``` r
+
+dpl <- dyn_phase_lock(phases)
+
+# Phase-locking array: [200 x 200 x 580]
+dim(dpl$sync_conn)
+#> [1] 200 200 580
+
+# LEiDA matrix: [580 x 200]  — one eigenvector per (trimmed) timepoint
+dim(dpl$leida)
+#> [1] 580 200
+```
+
+### Inspecting a single phase-locking matrix
+
+``` r
+
+# Symmetry and diagonal check on the first timepoint
+t1 <- dpl$sync_conn[, , 1]
+cat("Symmetric:", isTRUE(all.equal(t1, t(t1))), "\n")
+#> Symmetric: TRUE
+cat("Diagonal:", round(unique(diag(t1)), 6), "\n")   # cos(0) = 1
+#> Diagonal: 1
+```
+
+------------------------------------------------------------------------
+
+## Step 4: Brain state discovery with K-means
+
+The LEiDA vectors are the natural input to K-means clustering. Each
+cluster centre represents a recurring whole-brain phase-locking pattern
+— a **brain state**.
+
+``` r
+
+set.seed(42)
+K  <- 5
+km <- kmeans(dpl$leida, centers = K, nstart = 50, iter.max = 500)
+
+table(km$cluster)
+#> 
+#>   1   2   3   4   5 
+#> 102 184  78 100 116
+```
+
+The resulting state sequence (`km$cluster`) can be passed directly to
+`stateR` for fractional occupancy, dwell time, and Markov transition
+analysis.
+
+------------------------------------------------------------------------
+
+## Step 5: Kuramoto order parameter
+
+The **Kuramoto order parameter** *R(t)* measures the instantaneous
+global synchrony across all parcels:
+
+``` math
+R(t) = \frac{1}{N} \left| \sum_{j=1}^{N} e^{i\phi_j(t)} \right|
+```
+
+*R* = 1 means all parcels are perfectly phase-locked; *R* = 0 means
+phases are uniformly distributed.
+[`kuramoto()`](https://CoDe-Neuro.github.io/dynR/reference/kuramoto.md)
+returns the full synchrony time series along with two summary scalars:
+
+- **Metastability** — standard deviation of *R(t)*; reflects how much
+  the global synchronisation level fluctuates over time.
+- **Entropy** — Shannon entropy of the discretised synchrony
+  distribution; captures the diversity of synchrony states visited.
+
+``` r
+
+kop <- kuramoto(phases, base = 2, n_bits = 8)
+
+cat("Metastability:", round(kop$metastability, 4), "\n")
+#> Metastability: 0.0787
+cat("Entropy (bits):", round(kop$entropy, 4), "\n")
+#> Entropy (bits): 6.1409
+cat("Synchrony range: [",
+    round(min(kop$synchrony), 3), ",",
+    round(max(kop$synchrony), 3), "]\n")
+#> Synchrony range: [ 0.01 , 0.376 ]
+```
+
+### Visualising the synchrony time series
+
+``` r
+
+plot(kop$synchrony, type = "l", col = "#1B6799",
+     xlab = "Timepoint", ylab = "R(t)",
+     main = "Kuramoto order parameter",
+     ylim = c(0, 1), lwd = 1.2)
+abline(h = mean(kop$synchrony), col = "#FC544A", lty = 2, lwd = 1.5)
+legend("topright", legend = "Mean R(t)", col = "#FC544A",
+       lty = 2, lwd = 1.5, bty = "n")
+```
+
+![](phase-based-fc_files/figure-html/kuramoto-plot-1.png)
+
+------------------------------------------------------------------------
+
+## Summary
+
+``` r
+
+cat("Parcels:              ", nrow(ts_filt), "\n")
+#> Parcels:               200
+cat("Timepoints (raw):     ", ncol(ts_filt), "\n")
+#> Timepoints (raw):      600
+cat("Timepoints (trimmed): ", nrow(dpl$leida), "\n")
+#> Timepoints (trimmed):  580
+cat("Brain states (K):     ", K, "\n")
+#> Brain states (K):      5
+cat("Metastability:        ", round(kop$metastability, 4), "\n")
+#> Metastability:         0.0787
+```
+
+------------------------------------------------------------------------
+
+## References
+
+Cabral, J. et al. (2017). Cognitive performance in healthy older adults
+relates to spontaneous switching between states of functional
+connectivity during rest. *Scientific Reports*, 7(1), 5135.
+<https://doi.org/10.1038/s41598-017-05425-7>
+
+Lord, L.-D. et al. (2019). Dynamical exploration of the repertoire of
+brain networks at rest is modulated by psilocybin. *NeuroImage*, 199,
+127–142. <https://doi.org/10.1016/j.neuroimage.2019.05.060>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="462" viewBox="177 14 326 374"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><title>dynR</title><desc>dynR hex sticker: layered organic brain wave strands in blue-purple tones on brick red background, with dynR text.</desc><defs>
+    <clipPath id="hclip">
+      <polygon points="340,22 495,114 495,288 340,380 185,288 185,114"></polygon>
+    </clipPath>
+  </defs><g clip-path="url(#hclip)">
+    <!-- Background -->
+    <polygon points="340,22 495,114 495,288 340,380 185,288 185,114" fill="#9E3C30"></polygon>
+
+    <!-- Light blue pair -->
+    <path d="M 183,155 C 198,155 204,145 220,128 C 236,111 242,208 258,215 C 274,222 280,120 296,111 C 312,102 318,240 334,247 C 350,254 358,136 374,129 C 391,122 397,182 412,179 C 429,176 441,162 463,160 C 475,159 489,153 497,150" fill="none" stroke="#A8B8E0" stroke-width="1.6" stroke-linecap="round" opacity="0.70"></path>
+    <path d="M 183,162 C 198,162 205,152 221,135 C 237,118 243,213 259,220 C 275,227 281,124 297,115 C 313,106 319,247 335,254 C 351,261 359,141 375,134 C 392,127 398,190 413,187 C 430,184 442,170 464,168 C 476,167 490,161 497,158" fill="none" stroke="#A8B8E0" stroke-width="2.0" stroke-linecap="round" opacity="0.75"></path>
+
+    <!-- Periwinkle pair -->
+    <path d="M 183,180 C 198,180 204,170 220,152 C 236,134 242,233 258,239 C 274,245 280,135 296,125 C 312,115 318,255 334,262 C 350,269 358,146 374,139 C 391,132 397,206 413,203 C 430,200 442,187 464,184 C 476,183 490,188 497,182" fill="none" stroke="#8D9FD7" stroke-width="2.8" stroke-linecap="round" opacity="0.80"></path>
+    <path d="M 183,187 C 197,187 202,176 218,158 C 234,140 239,238 255,244 C 271,250 277,139 293,129 C 309,119 315,259 331,266 C 347,273 355,148 371,141 C 388,134 394,209 411,206 C 428,203 440,191 462,188 C 474,187 488,193 497,189" fill="none" stroke="#8D9FD7" stroke-width="3.2" stroke-linecap="round" opacity="0.85"></path>
+
+    <!-- Mauve pair -->
+    <path d="M 183,193 C 198,193 204,184 220,166 C 236,148 242,242 258,248 C 274,254 280,141 296,131 C 312,121 318,261 334,268 C 350,275 358,149 374,142 C 391,135 397,209 412,206 C 429,203 441,191 463,188 C 475,187 489,193 497,195" fill="none" stroke="#754D71" stroke-width="3.8" stroke-linecap="round" opacity="0.85"></path>
+    <path d="M 183,201 C 196,201 200,191 216,172 C 232,153 238,248 254,254 C 270,260 276,145 292,135 C 308,125 314,264 330,271 C 346,278 354,153 370,146 C 387,139 393,213 410,210 C 427,207 439,195 461,192 C 473,191 487,197 497,203" fill="none" stroke="#754D71" stroke-width="4.2" stroke-linecap="round" opacity="0.90"></path>
+
+    <!-- Deep indigo pair (front) -->
+    <path d="M 183,190 C 198,190 203,181 219,163 C 235,145 241,239 257,245 C 273,251 279,139 295,129 C 311,119 317,257 333,264 C 349,271 357,147 373,140 C 390,133 396,207 412,204 C 429,201 441,189 463,186 C 475,185 489,191 497,190" fill="none" stroke="#341C5D" stroke-width="4.6" stroke-linecap="round" opacity="0.90"></path>
+    <path d="M 183,197 C 198,197 203,188 219,170 C 235,152 241,246 257,252 C 273,258 279,146 295,136 C 311,126 317,264 333,271 C 349,278 357,154 373,147 C 390,140 396,214 412,211 C 429,208 441,196 463,193 C 475,192 489,198 497,197" fill="none" stroke="#341C5D" stroke-width="6.4" stroke-linecap="round"></path>
+
+    <!-- Package name -->
+    <text x="340" y="326" text-anchor="middle" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="38">
+      <tspan fill="#F5D5CC">dyn</tspan><tspan fill="#8D9FD7">R</tspan>
+    </text>
+  </g><polygon points="340,22 495,114 495,288 340,380 185,288 185,114" fill="none" stroke="#E19A8F" stroke-width="11"></polygon><polygon points="340,22 495,114 495,288 340,380 185,288 185,114" fill="none" stroke="#F5D5CC" stroke-width="2.5"></polygon></svg>
