@@ -12,6 +12,13 @@ navbar:
       icon: fab fa-github
       href: https://github.com/CoDe-Neuro/dynR
 
+articles:
+  - title: "Vignettes"
+    contents:
+      - getting-started
+      - phase-based-fc
+      - sliding-window-fc
+
 reference:
   - title: "Signal preprocessing"
     desc: "Filter and prepare BOLD timeseries prior to dynFC analysis."
