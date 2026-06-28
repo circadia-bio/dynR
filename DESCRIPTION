@@ -1,0 +1,40 @@
+Package: dynR
+Title: Dynamic Functional Connectivity Analysis for Neuroimaging Research
+Version: 0.1.0
+Authors@R: c(
+    person("Lucas", "França",
+           email = "lucas.franca@northumbria.ac.uk",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-0853-1319")),
+    person("Dafnis", "Batallé",
+           email = "dafnis.batalle@kcl.ac.uk",
+           role = "aut",
+           comment = c(ORCID = "0000-0003-2097-979X")))
+Description: Computes dynamic functional connectivity (dynFC) representations
+    from BOLD fMRI timeseries. Implements sliding-window Pearson correlation
+    (Hansen et al., 2015), edge-centric cofluctuation analysis (Esfahlani
+    et al., 2020; Faskowitz et al., 2020), instantaneous phase-locking via
+    the Hilbert transform, dynamic phase-locking matrices (dPL), the LEiDA
+    leading-eigenvector framework (Cabral et al., 2017; Lord et al., 2019),
+    and the Kuramoto order parameter with metastability and Shannon entropy.
+    Designed as the upstream dynFC computation layer feeding into stateR for
+    brain state metric quantification. Part of the CoDe-Neuro Lab R ecosystem.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
+Depends:
+    R (>= 4.1.0)
+Imports:
+    gsignal (>= 0.3.5),
+    cli (>= 3.6.0)
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    pkgdown,
+    withr
+Config/testthat/edition: 3
+URL: https://CoDe-Neuro.github.io/dynR, https://github.com/CoDe-Neuro/dynR
+BugReports: https://github.com/CoDe-Neuro/dynR/issues
+Config/roxygen2/version: 8.0.0

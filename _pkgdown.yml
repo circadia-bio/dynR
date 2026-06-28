@@ -1,0 +1,37 @@
+url: https://CoDe-Neuro.github.io/dynR
+
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [intro, reference, articles]
+    right: [github]
+  components:
+    github:
+      icon: fab fa-github
+      href: https://github.com/CoDe-Neuro/dynR
+
+reference:
+  - title: "Signal preprocessing"
+    desc: "Filter and prepare BOLD timeseries prior to dynFC analysis."
+    contents:
+      - bandpass_filter
+  - title: "Phase-based methods"
+    desc: "Instantaneous phase extraction, phase-locking, and Kuramoto order parameter."
+    contents:
+      - hilbert_phases
+      - dyn_phase_lock
+      - get_leida
+      - kuramoto
+  - title: "Correlation-based methods"
+    desc: "Sliding-window FC and edge-centric cofluctuation."
+    contents:
+      - corr_slide
+      - cofluct
+      - corr_corr
+  - title: "Utilities"
+    desc: "Entropy and distance helpers."
+    contents:
+      - shannon_entropy
+      - do_euclid
