@@ -3,6 +3,8 @@ url: https://CoDe-Neuro.github.io/dynR
 template:
   bootstrap: 5
 
+logo: man/figures/logo.svg
+
 navbar:
   structure:
     left: [intro, reference, articles]

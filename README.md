@@ -1,4 +1,4 @@
-# 🧠 dynR
+# dynR <img src="man/figures/logo.svg" align="right" height="140"/>
 
 An R package for **dynamic functional connectivity (dynFC)** analysis of BOLD fMRI timeseries — sliding-window correlations, edge-centric cofluctuations, instantaneous phase-locking, LEiDA leading eigenvectors, and the Kuramoto order parameter.
 
@@ -117,61 +117,6 @@ ec <- cofluct(ts_filt)
 # ec$edge_ts — edge time series [n_edges x 300]
 # ec$rss     — root-sum-square cofluctuation [300]
 ```
-
----
-
-## 🔧 Function reference
-
-### `hilbert_phases(timeseries)`
-
-Computes instantaneous phases via the Hilbert transform.
-Input: `[N × Tmax]` matrix. Output: `[N × Tmax]` phase matrix in radians.
-Each parcel is demeaned before transformation.
-
-### `dyn_phase_lock(phases)`
-
-Computes instantaneous phase-locking matrices from phase time series.
-Trims 10 timepoints from each end (edge effects).
-Returns `sync_conn` `[N, N, Tmax-20]` and `leida` `[Tmax-20, N]`.
-
-### `get_leida(sync_conn)`
-
-Extracts the leading eigenvector from each phase-locking matrix.
-Sign-normalised so that the sum of each eigenvector is ≤ 0.
-Output: `[Tmax × N]`.
-
-### `kuramoto(phases, base = 2, n_bits = 8)`
-
-Global Kuramoto order parameter time series (trimmed), metastability index
-(standard deviation), and Shannon entropy of synchrony.
-
-### `corr_slide(timeseries, window, step = NULL)`
-
-Pearson correlation matrices over sliding windows. Non-overlapping by default
-(`step = window`). Returns `corr_mats` `[N, N, n_windows]` and onset `idx`.
-
-### `cofluct(timeseries, k = 1)`
-
-Edge time series (element-wise product of z-scored parcel pairs) and RSS
-cofluctuation vector. Returns `edge_ts` `[n_edges × Tmax]` and `rss` `[Tmax]`.
-
-### `corr_corr(timeseries, k = 1)`
-
-Correlation of correlations: `[Tmax × Tmax]` matrix of pairwise correlations
-between edge time series.
-
-### `bandpass_filter(x, flp, fhi, delt, order = 2)`
-
-Zero-phase Butterworth bandpass filter via `gsignal::butter()` +
-`gsignal::filtfilt()`.
-
-### `shannon_entropy(x, base = 2, n_bits = NULL)`
-
-Shannon entropy from a numeric vector. Optional bit-depth discretisation.
-
-### `do_euclid(x)`
-
-Row-wise Euclidean distance between consecutive points in a matrix.
 
 ---
 
