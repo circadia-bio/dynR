@@ -32,10 +32,10 @@ test_that("shannon_entropy: constant series gives zero entropy", {
   expect_equal(shannon_entropy(series), 0)
 })
 
-test_that("shannon_entropy: n_bits discretisation reduces precision", {
+test_that("shannon_entropy: n_bits discretisation matches manual round-and-scale", {
   set.seed(1)
-  x    <- runif(100)
-  h_raw  <- shannon_entropy(x * 256, base = 2)      # manual scale
-  h_bits <- shannon_entropy(x, base = 2, n_bits = 8) # via n_bits
+  x      <- runif(100)
+  h_raw  <- shannon_entropy(round(x * 256), base = 2) # manual: scale then round
+  h_bits <- shannon_entropy(x, base = 2, n_bits = 8)  # via n_bits
   expect_equal(h_raw, h_bits, tolerance = 1e-10)
 })

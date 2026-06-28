@@ -66,5 +66,5 @@ cofluct <- function(timeseries, k = 1) {
 #' dim(cc)  # 100 x 100
 corr_corr <- function(timeseries, k = 1) {
   res <- cofluct(timeseries, k)
-  cor(t(res$edge_ts))
+  cor(res$edge_ts)
 }
