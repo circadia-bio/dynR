@@ -18,6 +18,7 @@
 #' the switching behavior of the resting state. *NeuroImage*, 105, 525–535.
 #' \doi{10.1016/j.neuroimage.2014.11.001}
 #'
+#' @importFrom stats cor
 #' @export
 #' @examples
 #' set.seed(1)

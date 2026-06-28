@@ -25,6 +25,7 @@
 #' *Nature Neuroscience*, 23(12), 1644–1654.
 #' \doi{10.1038/s41593-020-00719-y}
 #'
+#' @importFrom stats cor
 #' @export
 #' @examples
 #' set.seed(1)

@@ -18,6 +18,7 @@
 #'     at each (trimmed) timepoint.}
 #'   \item{entropy}{Numeric scalar. Shannon entropy of the synchrony series.}
 #'
+#' @importFrom stats sd
 #' @export
 #' @examples
 #' set.seed(1)
