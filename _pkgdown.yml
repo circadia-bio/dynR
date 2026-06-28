@@ -135,6 +135,15 @@ navbar:
     intro:
       text: Get started
       href: articles/getting-started.html
+    articles:
+      text: Vignettes
+      menu:
+        - text: Getting started
+          href: articles/getting-started.html
+        - text: Phase-based FC
+          href: articles/phase-based-fc.html
+        - text: Sliding-window FC
+          href: articles/sliding-window-fc.html
     github:
       icon: fab fa-github
       href: https://github.com/CoDe-Neuro/dynR
