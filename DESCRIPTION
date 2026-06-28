@@ -33,7 +33,8 @@ Suggests:
     knitr,
     rmarkdown,
     pkgdown,
-    withr
+    withr,
+    ggplot2 (>= 3.4.0)
 Config/testthat/edition: 3
 URL: https://CoDe-Neuro.github.io/dynR, https://github.com/CoDe-Neuro/dynR
 BugReports: https://github.com/CoDe-Neuro/dynR/issues
