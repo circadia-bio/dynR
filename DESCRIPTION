@@ -41,6 +41,7 @@ Suggests:
     withr,
     ggplot2 (>= 3.4.0)
 Config/testthat/edition: 3
+Lifecycle: experimental
 URL: https://dynr.circadia-lab.uk, https://github.com/circadia-bio/dynR
 BugReports: https://github.com/circadia-bio/dynR/issues
 Config/roxygen2/version: 8.0.0

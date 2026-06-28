@@ -123,7 +123,10 @@ home:
     correlations, edge-centric cofluctuations, instantaneous phase-locking,
     LEiDA, and the Kuramoto order parameter. Part of the Circadia Lab
     R ecosystem.
+  strip_header: true
   links:
+  - text: 🚧 This package is in active development — the API may change
+    href: https://lifecycle.r-lib.org/articles/stages.html#experimental
   - text: Circadia Lab
     href: https://github.com/circadia-bio
   - text: Python dynfc
