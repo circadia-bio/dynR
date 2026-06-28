@@ -20,6 +20,12 @@ articles:
       - sliding-window-fc
 
 reference:
+  - title: "Data"
+    desc: "Example datasets bundled with dynR."
+    contents:
+      - ts
+      - fc
+
   - title: "Signal preprocessing"
     desc: "Filter and prepare BOLD timeseries prior to dynFC analysis."
     contents:
