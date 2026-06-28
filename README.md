@@ -1,4 +1,4 @@
-# dynR <img src="man/figures/logo.svg" align="right" height="140"/>
+# 🧠 dynR <img src="man/figures/logo.svg" align="right" height="140"/>
 
 An R port of the Python [dynfc](https://github.com/LucasFranca/dynfc) library
 for computing **dynamic connectivity (dynFC)** representations from
