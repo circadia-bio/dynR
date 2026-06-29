@@ -13,6 +13,10 @@ signals.
 
 ---
 
+> ⚠️ **dynR is in early development and has not been formally tested.** The API may change without notice, estimation results have not yet been validated against a reference implementation, and the package has not undergone peer review. Use with caution and verify outputs independently before using in any research context.
+
+---
+
 ## 📖 What is dynR?
 
 `dynR` computes dynFC representations from preprocessed multivariate
