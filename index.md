@@ -10,7 +10,7 @@ CHECK](https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml/b
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://dynr.circadia-lab.uk/LICENSE)
 [![R](https://img.shields.io/badge/R-%E2%89%A54.1-276DC3.svg)](https://www.r-project.org/)
-[![Version](https://img.shields.io/badge/version-0.1.1-lightgrey)](https://github.com/circadia-bio/dynR)
+[![Version](https://img.shields.io/badge/version-0.1.2-lightgrey)](https://github.com/circadia-bio/dynR)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
@@ -85,12 +85,25 @@ quantification (fractional occupancy, dwell time, Markov transitions).
 | [`shannon_entropy()`](https://dynr.circadia-lab.uk/reference/shannon_entropy.md) | Shannon entropy with optional bit-depth discretisation |
 | [`do_euclid()`](https://dynr.circadia-lab.uk/reference/do_euclid.md) | Euclidean distance between consecutive trajectory points |
 
+### State dynamics
+
+| Function | Description |
+|----|----|
+| [`dyn_transitions()`](https://dynr.circadia-lab.uk/reference/dyn_transitions.md) | First-order Markov transition probabilities between brain states |
+
 ------------------------------------------------------------------------
 
 ## 🚀 Installation
 
 ``` r
 
+# From r-universe (recommended — no GitHub token needed)
+install.packages("dynR", repos = c(
+  "https://circadia-bio.r-universe.dev",
+  "https://cloud.r-project.org"
+))
+
+# Or from GitHub
 # install.packages("pak")
 pak::pak("circadia-bio/dynR")
 ```
