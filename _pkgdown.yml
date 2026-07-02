@@ -187,6 +187,11 @@ reference:
       - cofluct
       - corr_corr
 
+  - title: "State dynamics"
+    desc: "Quantify the temporal structure of brain-state sequences."
+    contents:
+      - dyn_transitions
+
   - title: "Utilities"
     desc: "Entropy and distance helpers."
     contents:

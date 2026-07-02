@@ -21,8 +21,17 @@ bandpass_filter(x, flp, fhi, delt, order = 2)
 Numeric vector. Zero-phase filtered signal, same length as \code{x}.
 }
 \description{
-Design and apply a zero-phase Butterworth bandpass filter to a signal.
-Wraps \code{\link[gsignal:butter]{gsignal::butter()}} and \code{\link[gsignal:filtfilt]{gsignal::filtfilt()}} for convenience.
+Design and apply a zero-phase Butterworth bandpass filter to a signal,
+using scipy-compatible steady-state initial conditions (equivalent to
+\code{scipy.signal.sosfiltfilt} / \code{scipy.signal.filtfilt} with
+\code{padtype = "odd"}).
+}
+\details{
+\code{gsignal::filtfilt()} uses zero initial conditions, which produces edge
+transients up to ~0.24 signal units on real fMRI data. This implementation
+replicates scipy's \code{lfilter_zi} approach: both the forward and backward
+passes are initialised at steady state scaled by the first sample of each
+pass, reducing edge error to machine precision.
 }
 \examples{
 set.seed(1)

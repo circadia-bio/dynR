@@ -1,5 +1,24 @@
 # NEWS.md
 
+## dynR 0.1.2
+
+### New functions
+
+* `dyn_transitions()`: first-order Markov transition probabilities between
+  brain states. Takes a long-format timepoint-level data frame, computes
+  source → target transitions within each group (subject × session), and
+  returns a nested tibble of per-transition probabilities ready for
+  `grouped_perm_glmm()`. Ported from `clusters_markov()` in the
+  `neonatal_dfc` analysis pipeline (França et al., *Nat Commun*).
+  `remIntra = TRUE` strips self-transitions before normalising.
+
+### Dependencies
+
+* Added `dplyr`, `tidyr`, and `rlang` to `Imports` (required by
+  `dyn_transitions()`).
+
+---
+
 ## dynR 0.1.1
 
 ### Bug fixes
