@@ -14,7 +14,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/circadia-bio/dynR/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/circadia-bio/dynR/blob/v0.1.1/DESCRIPTION)
 
 França L, Leocadio-Miguel M, Batallé D (2026). *dynR: Dynamic
 Connectivity Analysis for Neurophysiological Timeseries*. R package
