@@ -1,4 +1,4 @@
-# dynR <img src="man/figures/logo.svg" align="right" height="140"/>
+# 🧠 dynR <img src="man/figures/logo.svg" align="right" height="140"/>
 
 An R port of the Python [dynfc](https://github.com/LucasFranca/dynfc) library
 for computing **dynamic connectivity (dynFC)** representations from
@@ -10,6 +10,10 @@ signals.
 [![R](https://img.shields.io/badge/R-≥4.1-276DC3.svg)](https://www.r-project.org/)
 [![Version](https://img.shields.io/badge/version-0.1.0-lightgrey)](https://github.com/circadia-bio/dynR)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+
+---
+
+> ⚠️ **dynR is in early development and has not been formally tested.** The API may change without notice, estimation results have not yet been validated against a reference implementation, and the package has not undergone peer review. Use with caution and verify outputs independently before using in any research context.
 
 ---
 
