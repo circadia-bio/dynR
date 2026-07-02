@@ -80,7 +80,7 @@ phases <- hilbert_phases(ts_filt)
 dim(phases)    # [200 × 600]
 #> [1] 200 600
 range(phases)  # in [-pi, pi]
-#> [1] -3.141541  3.141524
+#> [1] -3.141479  3.141498
 ```
 
 Each row is a parcel; each column is a timepoint. Values are in radians.
@@ -163,7 +163,7 @@ km <- kmeans(dpl$leida, centers = K, nstart = 100, iter.max = 500)
 table(km$cluster)
 #> 
 #>   1   2   3   4   5 
-#> 102 184  78 100 116
+#>  65 144 112  98 161
 ```
 
 ### State sequence
@@ -229,9 +229,9 @@ repertoire (Lord et al., 2019).
 kop <- kuramoto(phases, base = 2, n_bits = 8)
 
 cat("Metastability:", round(kop$metastability, 4), "\n")
-#> Metastability: 0.0787
+#> Metastability: 0.0788
 cat("Entropy (bits):", round(kop$entropy, 4), "\n")
-#> Entropy (bits): 6.1409
+#> Entropy (bits): 6.1722
 ```
 
 ``` r
