@@ -1,3 +1,5 @@
+utils::globalVariables(c("clus", "tag", "target", "tot"))
+
 #' State transition probabilities (Markov analysis)
 #'
 #' From a long-format data frame of cluster labels ordered in time, compute
@@ -48,8 +50,6 @@
 #'   groupBy = c("sub", "ses")
 #' )
 #' tr
-utils::globalVariables(c("clus", "tag", "target", "tot"))
-
 dyn_transitions <- function(tbl, vars, cVar, sortBy, groupBy,
                             remIntra = FALSE) {
   vars_ext_ <- rlang::syms(c(vars, "source", "target", "tag"))
