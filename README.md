@@ -8,7 +8,7 @@ signals.
 [![R CMD CHECK](https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![R](https://img.shields.io/badge/R-≥4.1-276DC3.svg)](https://www.r-project.org/)
-[![Version](https://img.shields.io/badge/version-0.1.0-lightgrey)](https://github.com/circadia-bio/dynR)
+[![Version](https://img.shields.io/badge/version-0.1.1-lightgrey)](https://github.com/circadia-bio/dynR)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
 ---
