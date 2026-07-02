@@ -83,7 +83,25 @@ tr <- dyn_transitions(
   sortBy  = c("sub", "ses", "ttime"),
   groupBy = c("sub", "ses")
 )
-#> Error in dyn_transitions(df, vars = c("sub", "ses"), cVar = "clus4", sortBy = c("sub",     "ses", "ttime"), groupBy = c("sub", "ses")): could not find function "dyn_transitions"
 tr
-#> Error: object 'tr' not found
+#> # A tibble: 16 × 4
+#> # Groups:   tag, source, target [16]
+#>    source target tag   data            
+#>     <int>  <int> <chr> <list>          
+#>  1      1      1 1_1   <tibble [2 × 5]>
+#>  2      1      2 1_2   <tibble [2 × 5]>
+#>  3      1      3 1_3   <tibble [2 × 5]>
+#>  4      1      4 1_4   <tibble [2 × 5]>
+#>  5      2      1 2_1   <tibble [2 × 5]>
+#>  6      2      2 2_2   <tibble [2 × 5]>
+#>  7      2      3 2_3   <tibble [2 × 5]>
+#>  8      2      4 2_4   <tibble [2 × 5]>
+#>  9      3      1 3_1   <tibble [2 × 5]>
+#> 10      3      2 3_2   <tibble [2 × 5]>
+#> 11      3      3 3_3   <tibble [2 × 5]>
+#> 12      3      4 3_4   <tibble [2 × 5]>
+#> 13      4      1 4_1   <tibble [2 × 5]>
+#> 14      4      2 4_2   <tibble [2 × 5]>
+#> 15      4      3 4_3   <tibble [2 × 5]>
+#> 16      4      4 4_4   <tibble [2 × 5]>
 ```
