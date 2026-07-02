@@ -8,7 +8,7 @@ signals.
 [![R CMD CHECK](https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![R](https://img.shields.io/badge/R-≥4.1-276DC3.svg)](https://www.r-project.org/)
-[![Version](https://img.shields.io/badge/version-0.1.1-lightgrey)](https://github.com/circadia-bio/dynR)
+[![Version](https://img.shields.io/badge/version-0.1.2-lightgrey)](https://github.com/circadia-bio/dynR)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
 ---
@@ -77,11 +77,23 @@ Multivariate timeseries  [N × Tmax]
 | `shannon_entropy()` | Shannon entropy with optional bit-depth discretisation |
 | `do_euclid()` | Euclidean distance between consecutive trajectory points |
 
+### State dynamics
+| Function | Description |
+|---|---|
+| `dyn_transitions()` | First-order Markov transition probabilities between brain states |
+
 ---
 
 ## 🚀 Installation
 
 ```r
+# From r-universe (recommended — no GitHub token needed)
+install.packages("dynR", repos = c(
+  "https://circadia-bio.r-universe.dev",
+  "https://cloud.r-project.org"
+))
+
+# Or from GitHub
 # install.packages("pak")
 pak::pak("circadia-bio/dynR")
 ```
