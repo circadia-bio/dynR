@@ -18,12 +18,12 @@ Source:
 
 França L, Leocadio-Miguel M, Batallé D (2026). *dynR: Dynamic
 Connectivity Analysis for Neurophysiological Timeseries*. R package
-version 0.1.1, <https://dynr.circadia-lab.uk>.
+version 0.1.2, <https://dynr.circadia-lab.uk>.
 
     @Manual{,
       title = {dynR: Dynamic Connectivity Analysis for Neurophysiological Timeseries},
       author = {Lucas França and Mario Leocadio-Miguel and Dafnis Batallé},
       year = {2026},
-      note = {R package version 0.1.1},
+      note = {R package version 0.1.2},
       url = {https://dynr.circadia-lab.uk},
     }

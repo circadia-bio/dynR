@@ -41,6 +41,13 @@ Sliding-window FC and edge-centric cofluctuation.
 - [`corr_corr()`](https://dynr.circadia-lab.uk/reference/corr_corr.md) :
   Correlation of correlations matrix
 
+## State dynamics
+
+Quantify the temporal structure of brain-state sequences.
+
+- [`dyn_transitions()`](https://dynr.circadia-lab.uk/reference/dyn_transitions.md)
+  : State transition probabilities (Markov analysis)
+
 ## Utilities
 
 Entropy and distance helpers.
