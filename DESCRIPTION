@@ -39,7 +39,8 @@ Suggests:
     rmarkdown,
     pkgdown,
     withr,
-    ggplot2 (>= 3.4.0)
+    ggplot2 (>= 3.4.0),
+    reticulate
 Config/testthat/edition: 3
 Lifecycle: experimental
 URL: https://dynr.circadia-lab.uk, https://github.com/circadia-bio/dynR
