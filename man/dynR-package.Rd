@@ -24,6 +24,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Lucas França \email{lucas.franca@northumbria.ac.uk} (\href{https://orcid.org/0000-0003-0853-1319}{ORCID})
   \item Mario Leocadio-Miguel \email{mario.miguel@northumbria.ac.uk} (\href{https://orcid.org/0000-0002-7248-3529}{ORCID})
   \item Dafnis Batallé \email{dafnis.batalle@kcl.ac.uk} (\href{https://orcid.org/0000-0003-2097-979X}{ORCID})
 }
