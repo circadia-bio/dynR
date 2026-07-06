@@ -15,10 +15,5 @@
 #' d <- do_euclid(pcs)
 #' length(d)  # 50
 do_euclid <- function(x) {
-  n <- nrow(x)
-  d <- numeric(n)
-  for (i in seq(2L, n)) {
-    d[i] <- sqrt(sum((x[i, ] - x[i - 1L, ])^2))
-  }
-  d
+  c(0, sqrt(rowSums(diff(x)^2)))
 }

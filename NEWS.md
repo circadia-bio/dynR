@@ -1,5 +1,49 @@
 # NEWS.md
 
+## dynR 0.1.4
+
+### Performance
+
+Four additional compiled backends and one vectorisation, completing the C++
+acceleration of all main compute paths:
+
+* `get_leida()`: C++ / LAPACK backend (`get_leida_cpp()`). Calls LAPACK
+  `dsyev` directly via `R_ext/Lapack.h`; workspace allocated once and reused
+  across all timepoints. `dsyev` returns eigenvalues in ascending order so the
+  leading eigenvector is the last column (opposite of R's `eigen()`). Parity
+  vs `eigen()`: max diff < 2.5e-15.
+
+* `kuramoto()`: C++ backend (`kuramoto_sync_cpp()`). Replaces `vapply` +
+  R complex `exp(1i*x)` with direct `cos`/`sin` accumulation and `sqrt` —
+  no complex-number allocation. Parity vs R `vapply` reference: < 1e-14.
+
+* `hilbert_phases()`: vectorised with `mvfft()`. Replaces N per-parcel
+  `fft()` calls in an R loop with two `mvfft()` calls on the full matrix.
+  The Hilbert multiplier is broadcast across parcel columns in one step.
+  (`fft_factor`/`fft_work` are not in R's public API on macOS/Accelerate;
+  `mvfft` achieves equivalent throughput without a bundled FFT.)
+  Parity vs `.hilbert_r()` loop: < 1e-14.
+
+* `corr_slide()`: C++ backend (`corr_slide_cpp()`). Computes Pearson
+  correlation directly on the input matrix without per-window submatrix
+  allocation or transposition. Cross-products accumulated in the upper
+  triangle with t-outer loop ordering (column-major sequential access).
+  Tested for non-overlapping and overlapping (step = 10, 5) windows.
+  Parity vs `cor()`: < 1e-10; removes `stats::cor` from `Imports`.
+
+* `do_euclid()`: vectorised with `diff()` + `rowSums()`. Loop over rows
+  replaced by `c(0, sqrt(rowSums(diff(x)^2)))`.
+
+### Tests
+
+* Added parity tests for all new backends: `get_leida_cpp`, `kuramoto_sync_cpp`,
+  `hilbert_phases` (mvfft path), `corr_slide_cpp`, and `dyn_phase_lock_cpp`
+  (bit-perfect, max diff == 0).
+* Added `tests/testthat/test-leida.R` covering dimensions, sign convention,
+  and LAPACK/eigen parity.
+
+---
+
 ## dynR 0.1.3
 
 ### Performance
