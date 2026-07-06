@@ -24,6 +24,7 @@
 #' during rest. *Scientific Reports*, 7(1), 5135.
 #' \doi{10.1038/s41598-017-05425-7}
 #'
+#' @importFrom stats fft mvfft
 #' @export
 #' @examples
 #' set.seed(1)

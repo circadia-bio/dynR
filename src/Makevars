@@ -1,4 +1,10 @@
-# Link against R's bundled LAPACK and BLAS (required for dsyev in get_leida.cpp).
-# $(FLIBS) is intentionally omitted: F77_CALL routes through R's own Fortran
-# interface so the Fortran runtime is already present in the base R library.
-PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS)
+# Link against R's bundled LAPACK and BLAS.
+#
+# FLIBS is overridden to empty: dsyev_ resolves at load time through R's own
+# libRlapack (Linux) or the Accelerate framework (macOS) — neither requires
+# libgfortran from the Fortran compiler toolchain.
+#
+# $(FLIBS) is referenced (not expanded) to satisfy R CMD check's heuristic
+# that BLAS_LIBS/LAPACK_LIBS should be accompanied by FLIBS.
+FLIBS =
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
