@@ -23,3 +23,25 @@ dyn_phase_lock_cpp <- function(phases) {
     .Call(`_dynR_dyn_phase_lock_cpp`, phases)
 }
 
+#' Leading eigenvector decomposition (LEiDA) -- C++ / LAPACK backend
+#'
+#' Internal workhorse called by [get_leida()]. For each phase-locking matrix
+#' slice in `sync_conn`, calls LAPACK `dsyev` (symmetric eigendecomposition)
+#' and returns only the leading eigenvector.
+#'
+#' Differences from the R implementation:
+#' - `dsyev` returns eigenvalues in **ascending** order, so the leading
+#'   eigenvector is the **last** column of the output (opposite of R's
+#'   `eigen()` which is descending).
+#' - The LAPACK workspace is allocated once and reused across all timepoints.
+#' - Sign convention preserved: row sum forced to be non-positive.
+#'
+#' @param sync_conn NumericVector with `dim` attribute \[N, N, t_points\].
+#'
+#' @return NumericMatrix \[t_points x N\]. Leading eigenvectors, one per row.
+#'
+#' @keywords internal
+get_leida_cpp <- function(sync_conn) {
+    .Call(`_dynR_get_leida_cpp`, sync_conn)
+}
+
