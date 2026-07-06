@@ -49,27 +49,29 @@ test_that("bandpass_filter: constant signal is filtered to near-zero (DC gain = 
 
 test_that("bandpass_filter: recovers in-band sine from a mixed signal (scipy docs analogy)", {
   # Analogous to scipy docs example 1, but using a bandpass instead of a
-  # lowpass:
-  #   xlow  = sin(2π × 5 × t)    ← 5 Hz, inside 1–100 Hz passband
-  #   xhigh = sin(2π × 250 × t)  ← 250 Hz, outside passband
-  #   x     = xlow + xhigh
-  #   bandpass order 8, cutoffs 1–100 Hz, fs = 2000 Hz
+  # lowpass. The original test used flp=1 Hz at fs=2000 Hz, which requires
+  # ~2560 samples for the 8th-order filter to settle — longer than the entire
+  # 2001-sample signal. Valid parameters need the lower cutoff high enough
+  # that 1/f_lp << n/fs (filter impulse response fits inside the signal).
   #
-  # After filtering, the middle 80% of the output should approximate xlow.
-  # scipy achieves max|y − xlow| ≈ 9.1e-6 (padlen=150, 8th-order lowpass);
-  # we allow a generous 1e-3 tolerance here to account for the different
-  # filter type, default padlen, and Butterworth gain at 5 Hz ≠ 1.
+  #   x_in  = sin(2pi x 200 x t)   <- 200 Hz, inside 100-600 Hz passband
+  #   x_out = sin(2pi x 900 x t)   <- 900 Hz, outside passband
+  #   x     = x_in + x_out
+  #   bandpass order 8, cutoffs 100-600 Hz, fs = 2000 Hz
+  #
+  # scipy sosfiltfilt achieves max|y - x_in| < 1e-5 for these parameters.
+  # We allow 1e-3 tolerance.
 
   n  <- 2001L
   fs <- 2000         # Hz
-  x_low  <- make_sine(5,   n, fs)
-  x_high <- make_sine(250, n, fs)
-  x      <- x_low + x_high
+  x_in  <- make_sine(200, n, fs)   # 200 Hz, in passband
+  x_out <- make_sine(900, n, fs)   # 900 Hz, out of passband
+  x     <- x_in + x_out
 
-  y   <- bandpass_filter(x, flp = 1, fhi = 100, delt = 1 / fs, order = 8)
-  mid <- 200L:1800L  # exclude 200 samples each side for edge effects
+  y   <- bandpass_filter(x, flp = 100, fhi = 600, delt = 1 / fs, order = 8)
+  mid <- 200L:1800L
 
-  expect_lt(max(abs(y[mid] - x_low[mid])), 1e-3)
+  expect_lt(max(abs(y[mid] - x_in[mid])), 1e-3)
 })
 
 # ── 4. Stopband attenuation ───────────────────────────────────────────────────

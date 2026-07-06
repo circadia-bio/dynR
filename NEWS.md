@@ -1,5 +1,30 @@
 # NEWS.md
 
+## dynR 0.1.3
+
+### Performance
+
+* `dyn_phase_lock()` now delegates the phase-locking loop to a compiled C++
+  backend (`dyn_phase_lock_cpp()`). The inner `outer(cos(a-b))` R loop is
+  replaced by a triple nested C++ loop that exploits symmetry
+  (`cos(a-b) = cos(b-a)`): only the upper triangle is evaluated and mirrored,
+  halving trigonometric operations. Adds `Rcpp` as a dependency.
+
+### Dependencies
+
+* Removed `gsignal` from `Imports`. Both remaining uses have been ported to
+  base-R equivalents:
+  - `gsignal::butter()` replaced by `.butter_bandpass()` — a direct port of
+    `scipy.signal.butter()` (analog Butterworth LP prototype -> LP-to-BP
+    transformation -> bilinear transform -> ZPK-to-TF). Coefficients validated
+    against the `[k, 0, -2k, 0, k]` bandpass structure and existing scipy
+    parity tests.
+  - `gsignal::hilbert()` replaced by `.hilbert_r()` — FFT-based analytic
+    signal using base-R `fft()`, equivalent to `scipy.signal.hilbert()`.
+    Phase range confirmed `[-pi, pi]` on synthetic cosine.
+
+---
+
 ## dynR 0.1.2
 
 ### New functions

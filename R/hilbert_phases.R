@@ -4,10 +4,14 @@
 #' the analytic signal (Hilbert transform). Each parcel timeseries is
 #' demeaned before transformation.
 #'
-#' @param timeseries Numeric matrix \[N × Tmax\]. BOLD signal with N parcels
+#' The analytic signal is computed by `.hilbert_r()`, a bespoke port of
+#' `scipy.signal.hilbert()` that uses only base-R `fft()` and requires no
+#' external packages.
+#'
+#' @param timeseries Numeric matrix \[N x Tmax\]. BOLD signal with N parcels
 #'   as rows and Tmax timepoints as columns.
 #'
-#' @return Numeric matrix \[N × Tmax\]. Instantaneous phases in radians.
+#' @return Numeric matrix \[N x Tmax\]. Instantaneous phases in radians.
 #'
 #' @references
 #' Cabral, J. et al. (2017). Cognitive performance in healthy older adults
@@ -26,9 +30,35 @@ hilbert_phases <- function(timeseries) {
   Tmax <- ncol(timeseries)
   phases <- matrix(0, nrow = N, ncol = Tmax)
   for (i in seq_len(N)) {
-    x_c <- timeseries[i, ] - mean(timeseries[i, ])
-    xan <- gsignal::hilbert(x_c)
-    phases[i, ] <- Arg(xan)
+    x_c        <- timeseries[i, ] - mean(timeseries[i, ])
+    phases[i, ] <- Arg(.hilbert_r(x_c))
   }
   phases
+}
+
+# ── Internal helpers (not exported) ──────────────────────────────────────────
+
+# Analytic signal via FFT. Equivalent to scipy.signal.hilbert() and
+# gsignal::hilbert(). Returns a complex vector of the same length as x.
+#
+# Algorithm: FFT -> zero the negative-frequency components (multiply by h)
+# -> IFFT. The one-sided spectrum multiplier h is:
+#   h[1]           = 1  (DC)
+#   h[2 : N/2]     = 2  (positive freqs, doubled to preserve energy)
+#   h[N/2 + 1]     = 1  (Nyquist, N even only)
+#   h[N/2 + 2 : N] = 0  (negative freqs, zeroed)
+# For odd N the Nyquist bin does not exist; positive freqs run to (N+1)/2.
+.hilbert_r <- function(x) {
+  n  <- length(x)
+  Xf <- fft(x)
+  h  <- numeric(n)
+  if (n %% 2L == 0L) {
+    h[1L]           <- 1.0           # DC
+    h[n %/% 2L + 1L] <- 1.0          # Nyquist
+    h[2L:(n %/% 2L)] <- 2.0          # positive frequencies
+  } else {
+    h[1L]                    <- 1.0   # DC
+    h[2L:((n + 1L) %/% 2L)] <- 2.0   # positive frequencies
+  }
+  fft(Xf * h, inverse = TRUE) / n
 }

@@ -5,6 +5,11 @@
 #' last 10 timepoints are discarded to avoid edge effects from the Hilbert
 #' transform.
 #'
+#' The phase-locking computation is accelerated by a compiled C++ backend
+#' ([dyn_phase_lock_cpp()]): only the upper triangle is evaluated with
+#' `cos(phi_i - phi_j)` and mirrored to the lower, halving trigonometric
+#' operations relative to a naive double loop.
+#'
 #' @param phases Numeric matrix \[N × Tmax\]. Instantaneous phases in radians,
 #'   as returned by [hilbert_phases()].
 #'
@@ -20,7 +25,7 @@
 #' \doi{10.1038/s41598-017-05425-7}
 #'
 #' Lord, L.-D. et al. (2019). Dynamical exploration of the repertoire of brain
-#' networks at rest is modulated by psilocybin. *NeuroImage*, 199, 127–142.
+#' networks at rest is modulated by psilocybin. *NeuroImage*, 199, 127-142.
 #' \doi{10.1016/j.neuroimage.2019.05.060}
 #'
 #' @export
@@ -32,15 +37,7 @@
 #' dim(res$sync_conn)  # 10 x 10 x 180
 #' dim(res$leida)      # 180 x 10
 dyn_phase_lock <- function(phases) {
-  N     <- nrow(phases)
-  Tmax  <- ncol(phases)
-  T_idx <- seq(11L, Tmax - 10L)   # trim 10 timepoints from each end
-  n_T   <- length(T_idx)
-  sync_conn <- array(0, dim = c(N, N, n_T))
-  for (t in seq_len(n_T)) {
-    ph_t <- phases[, T_idx[t]]
-    sync_conn[, , t] <- outer(ph_t, ph_t, function(a, b) cos(a - b))
-  }
-  leida <- get_leida(sync_conn)
+  sync_conn <- dyn_phase_lock_cpp(phases)
+  leida     <- get_leida(sync_conn)
   list(sync_conn = sync_conn, leida = leida)
 }
