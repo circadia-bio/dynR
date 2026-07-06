@@ -88,7 +88,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dynR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,10 +116,104 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/circadia-bio/dynR/blob/v0.1.4/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/circadia-bio/dynR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
-  </main></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.5" id="dynr-015">dynR 0.1.5<a class="anchor" aria-label="anchor" href="#dynr-015"></a></h2>
+<div class="section level3">
+<h3 id="new-functions-0-1-5">New functions<a class="anchor" aria-label="anchor" href="#new-functions-0-1-5"></a></h3>
+<ul><li><p><code><a href="../reference/leida_pipeline.html">leida_pipeline()</a></code> / <code><a href="../reference/sw_pipeline.html">sw_pipeline()</a></code>: high-level wrappers running the full phase-based or correlation-based pipeline in one call. Both accept an optional <code>filter</code> argument to skip bandpass filtering on pre-filtered data. Return S3 objects (<code>dynR_leida</code> / <code>dynR_sw</code>) with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods.</p></li>
+<li><p><code><a href="../reference/plot_fc.html">plot_fc()</a></code>: FC matrix heatmap using the dynR diverging palette (deep indigo -&gt; periwinkle -&gt; brick red).</p></li>
+<li><p><code><a href="../reference/plot_synchrony.html">plot_synchrony()</a></code>: Kuramoto R(t) time series with mean reference line.</p></li>
+<li><p><code><a href="../reference/plot_state_sequence.html">plot_state_sequence()</a></code>: brain state tile plot with dynR state palette.</p></li>
+<li><p><code><a href="../reference/plot.dynR_leida.html">plot.dynR_leida()</a></code> / <code><a href="../reference/plot.dynR_sw.html">plot.dynR_sw()</a></code>: S3 plot methods for pipeline outputs; dispatch to <code><a href="../reference/plot_synchrony.html">plot_synchrony()</a></code> / <code><a href="../reference/plot_fc.html">plot_fc()</a></code> or the RSS plot via <code>type = c("synchrony"|"fc")</code> and <code>type = c("rss"|"fc")</code>.</p></li>
+<li><p><code><a href="../reference/batch_leida.html">batch_leida()</a></code> / <code><a href="../reference/batch_sw.html">batch_sw()</a></code>: apply the respective pipeline to multiple subjects at once. Accepts either a named list of [N x Tmax] matrices or a 3-D array [N x Tmax x subjects].</p></li>
+<li><p><code><a href="../reference/stack_leida.html">stack_leida()</a></code>: combine LEiDA eigenvector matrices from a batch result into a single data frame or matrix for cross-subject K-means clustering.</p></li>
+<li><p><code><a href="../reference/stack_synchrony.html">stack_synchrony()</a></code>: combine synchrony time series into a tidy long-format data frame with <code>subject</code>, <code>timepoint</code>, <code>synchrony</code>, and <code>metastability</code> columns.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="dependencies-0-1-5">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies-0-1-5"></a></h3>
+<ul><li>
+<code>ggplot2</code> moved from <code>Suggests</code> to <code>Imports</code> (required by plot functions).</li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.4" id="dynr-014">dynR 0.1.4<a class="anchor" aria-label="anchor" href="#dynr-014"></a></h2>
+<div class="section level3">
+<h3 id="performance-0-1-4">Performance<a class="anchor" aria-label="anchor" href="#performance-0-1-4"></a></h3>
+<p>Four additional compiled backends and one vectorisation, completing the C++ acceleration of all main compute paths:</p>
+<ul><li><p><code><a href="../reference/get_leida.html">get_leida()</a></code>: C++ / LAPACK backend (<code><a href="../reference/get_leida_cpp.html">get_leida_cpp()</a></code>). Calls LAPACK <code>dsyev</code> directly via <code>R_ext/Lapack.h</code>; workspace allocated once and reused across all timepoints. <code>dsyev</code> returns eigenvalues in ascending order so the leading eigenvector is the last column (opposite of R’s <code><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen()</a></code>). Parity vs <code><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen()</a></code>: max diff &lt; 2.5e-15.</p></li>
+<li><p><code><a href="../reference/kuramoto.html">kuramoto()</a></code>: C++ backend (<code><a href="../reference/kuramoto_sync_cpp.html">kuramoto_sync_cpp()</a></code>). Replaces <code>vapply</code> + R complex <code>exp(1i*x)</code> with direct <code>cos</code>/<code>sin</code> accumulation and <code>sqrt</code> — no complex-number allocation. Parity vs R <code>vapply</code> reference: &lt; 1e-14.</p></li>
+<li><p><code><a href="../reference/hilbert_phases.html">hilbert_phases()</a></code>: vectorised with <code><a href="https://rdrr.io/r/stats/fft.html" class="external-link">mvfft()</a></code>. Replaces N per-parcel <code><a href="https://rdrr.io/r/stats/fft.html" class="external-link">fft()</a></code> calls in an R loop with two <code><a href="https://rdrr.io/r/stats/fft.html" class="external-link">mvfft()</a></code> calls on the full matrix. The Hilbert multiplier is broadcast across parcel columns in one step. (<code>fft_factor</code>/<code>fft_work</code> are not in R’s public API on macOS/Accelerate; <code>mvfft</code> achieves equivalent throughput without a bundled FFT.) Parity vs <code>.hilbert_r()</code> loop: &lt; 1e-14.</p></li>
+<li><p><code><a href="../reference/corr_slide.html">corr_slide()</a></code>: C++ backend (<code><a href="../reference/corr_slide_cpp.html">corr_slide_cpp()</a></code>). Computes Pearson correlation directly on the input matrix without per-window submatrix allocation or transposition. Cross-products accumulated in the upper triangle with t-outer loop ordering (column-major sequential access). Tested for non-overlapping and overlapping (step = 10, 5) windows. Parity vs <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor()</a></code>: &lt; 1e-10; removes <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">stats::cor</a></code> from <code>Imports</code>.</p></li>
+<li><p><code><a href="../reference/do_euclid.html">do_euclid()</a></code>: vectorised with <code><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff()</a></code> + <code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums()</a></code>. Loop over rows replaced by <code>c(0, sqrt(rowSums(diff(x)^2)))</code>.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="tests-0-1-4">Tests<a class="anchor" aria-label="anchor" href="#tests-0-1-4"></a></h3>
+<ul><li>Added parity tests for all new backends: <code>get_leida_cpp</code>, <code>kuramoto_sync_cpp</code>, <code>hilbert_phases</code> (mvfft path), <code>corr_slide_cpp</code>, and <code>dyn_phase_lock_cpp</code> (bit-perfect, max diff == 0).</li>
+<li>Added <code>tests/testthat/test-leida.R</code> covering dimensions, sign convention, and LAPACK/eigen parity.</li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.3" id="dynr-013">dynR 0.1.3<a class="anchor" aria-label="anchor" href="#dynr-013"></a></h2>
+<div class="section level3">
+<h3 id="performance-0-1-3">Performance<a class="anchor" aria-label="anchor" href="#performance-0-1-3"></a></h3>
+<ul><li>
+<code><a href="../reference/dyn_phase_lock.html">dyn_phase_lock()</a></code> now delegates the phase-locking loop to a compiled C++ backend (<code><a href="../reference/dyn_phase_lock_cpp.html">dyn_phase_lock_cpp()</a></code>). The inner <code>outer(cos(a-b))</code> R loop is replaced by a triple nested C++ loop that exploits symmetry (<code>cos(a-b) = cos(b-a)</code>): only the upper triangle is evaluated and mirrored, halving trigonometric operations. Adds <code>Rcpp</code> as a dependency.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="dependencies-0-1-3">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies-0-1-3"></a></h3>
+<ul><li>Removed <code>gsignal</code> from <code>Imports</code>. Both remaining uses have been ported to base-R equivalents:
+<ul><li>
+<code><a href="https://rdrr.io/pkg/gsignal/man/butter.html" class="external-link">gsignal::butter()</a></code> replaced by <code>.butter_bandpass()</code> — a direct port of <code>scipy.signal.butter()</code> (analog Butterworth LP prototype -&gt; LP-to-BP transformation -&gt; bilinear transform -&gt; ZPK-to-TF). Coefficients validated against the <code>[k, 0, -2k, 0, k]</code> bandpass structure and existing scipy parity tests.</li>
+<li>
+<code><a href="https://rdrr.io/pkg/gsignal/man/hilbert.html" class="external-link">gsignal::hilbert()</a></code> replaced by <code>.hilbert_r()</code> — FFT-based analytic signal using base-R <code><a href="https://rdrr.io/r/stats/fft.html" class="external-link">fft()</a></code>, equivalent to <code>scipy.signal.hilbert()</code>. Phase range confirmed <code>[-pi, pi]</code> on synthetic cosine.</li>
+</ul></li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.2" id="dynr-012">dynR 0.1.2<a class="anchor" aria-label="anchor" href="#dynr-012"></a></h2>
+<div class="section level3">
+<h3 id="new-functions-0-1-2">New functions<a class="anchor" aria-label="anchor" href="#new-functions-0-1-2"></a></h3>
+<ul><li>
+<code><a href="../reference/dyn_transitions.html">dyn_transitions()</a></code>: first-order Markov transition probabilities between brain states. Takes a long-format timepoint-level data frame, computes source → target transitions within each group (subject × session), and returns a nested tibble of per-transition probabilities ready for <code>grouped_perm_glmm()</code>. Ported from <code>clusters_markov()</code> in the <code>neonatal_dfc</code> analysis pipeline (França et al., <em>Nat Commun</em>). <code>remIntra = TRUE</code> strips self-transitions before normalising.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="dependencies-0-1-2">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies-0-1-2"></a></h3>
+<ul><li>Added <code>dplyr</code>, <code>tidyr</code>, and <code>rlang</code> to <code>Imports</code> (required by <code><a href="../reference/dyn_transitions.html">dyn_transitions()</a></code>).</li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.1" id="dynr-011">dynR 0.1.1<a class="anchor" aria-label="anchor" href="#dynr-011"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-1-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-1"></a></h3>
+<ul><li>
+<p><code><a href="../reference/bandpass_filter.html">bandpass_filter()</a></code>: replaced <code><a href="https://rdrr.io/pkg/gsignal/man/filtfilt.html" class="external-link">gsignal::filtfilt()</a></code> (zero initial conditions) with a scipy-compatible implementation that achieves bit-perfect parity with <code>scipy.signal.filtfilt</code> and <code>scipy.signal.sosfiltfilt</code> (max |diff| &lt; 4e-12). The old implementation produced edge transients of up to ~0.24 signal units on real fMRI data due to zero initial state; this propagated into <code><a href="../reference/hilbert_phases.html">hilbert_phases()</a></code> and <code><a href="../reference/dyn_phase_lock.html">dyn_phase_lock()</a></code>, causing LEiDA eigenvectors to diverge from the Python <code>dynfc</code> reference pipeline.</p>
+<p>The fix introduces three internal helpers:</p>
+<ul><li>
+<code>.lfilter_zi()</code>: steady-state initial conditions via companion-matrix solve (equivalent to <code>scipy.signal.lfilter_zi</code>).</li>
+<li>
+<code>.lfilter()</code>: Direct Form II Transposed IIR filter with explicit initial state (equivalent to <code>scipy.signal.lfilter</code>).</li>
+<li>
+<code>.odd_ext()</code>: odd-reflection signal extension matching <code>scipy.signal._arraytools.odd_ext</code> exactly — right extension uses <code>x[N-2 : N-n-2 : -1]</code>, padlen = <code>3 × max(length(b), length(a))</code>.</li>
+</ul><p>With these corrections, per-timepoint correlations between R and Python LEiDA eigenvectors are identically 1.0 across all sessions.</p>
+</li>
+</ul></div>
+<div class="section level3">
+<h3 id="tests-0-1-1">Tests<a class="anchor" aria-label="anchor" href="#tests-0-1-1"></a></h3>
+<ul><li>Added <code>tests/testthat/test-bandpass_filter.R</code> with six tests adapted from the <code>scipy.signal.filtfilt</code> documentation examples: output-length preservation, DC blocking, in-band sine-wave recovery, stopband attenuation (&gt;40 dB), zero-phase property, and machine-precision agreement with <code>scipy.signal.filtfilt</code> on fMRI parameters (guarded by <code>skip_if_not_installed("reticulate")</code>).</li>
+<li>Added <code>reticulate</code> to <code>Suggests</code> for the scipy cross-validation test.</li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0" id="dynr-010">dynR 0.1.0<a class="anchor" aria-label="anchor" href="#dynr-010"></a></h2>
+<ul><li>Initial scaffold.</li>
+<li>Ported core dynamic functional connectivity functions from the Python <code>dynfc</code> package.</li>
+<li>Implements: <code><a href="../reference/bandpass_filter.html">bandpass_filter()</a></code>, <code><a href="../reference/hilbert_phases.html">hilbert_phases()</a></code>, <code><a href="../reference/corr_slide.html">corr_slide()</a></code>, <code><a href="../reference/cofluct.html">cofluct()</a></code>, <code><a href="../reference/corr_corr.html">corr_corr()</a></code>, <code><a href="../reference/dyn_phase_lock.html">dyn_phase_lock()</a></code>, <code><a href="../reference/get_leida.html">get_leida()</a></code>, <code><a href="../reference/kuramoto.html">kuramoto()</a></code>, <code><a href="../reference/shannon_entropy.html">shannon_entropy()</a></code>, <code><a href="../reference/do_euclid.html">do_euclid()</a></code>.</li>
+</ul></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

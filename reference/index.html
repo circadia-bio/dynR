@@ -88,7 +88,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dynR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -141,6 +141,29 @@
 
         </dt>
         <dd>Functional connectivity matrix (200 parcels)</dd>
+      </dl></div><div class="section level2">
+      <h2 id="pipelines">Pipelines<a class="anchor" aria-label="anchor" href="#pipelines"></a></h2>
+
+      <div class="section-desc"><p>High-level wrappers running the full phase-based or correlation-based pipeline in one call.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="leida_pipeline.html">leida_pipeline()</a></code>
+
+        </dt>
+        <dd>LEiDA pipeline</dd>
+
+        <dt>
+
+          <code><a href="sw_pipeline.html">sw_pipeline()</a></code>
+
+        </dt>
+        <dd>Sliding-window pipeline</dd>
       </dl></div><div class="section level2">
       <h2 id="signal-preprocessing">Signal preprocessing<a class="anchor" aria-label="anchor" href="#signal-preprocessing"></a></h2>
 
@@ -240,6 +263,87 @@
 
         </dt>
         <dd>State transition probabilities (Markov analysis)</dd>
+      </dl></div><div class="section level2">
+      <h2 id="visualisation">Visualisation<a class="anchor" aria-label="anchor" href="#visualisation"></a></h2>
+
+      <div class="section-desc"><p>Plot FC matrices, synchrony time series, and brain state sequences.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="plot_fc.html">plot_fc()</a></code>
+
+        </dt>
+        <dd>Plot a functional connectivity matrix</dd>
+
+        <dt>
+
+          <code><a href="plot_synchrony.html">plot_synchrony()</a></code>
+
+        </dt>
+        <dd>Plot Kuramoto synchrony time series</dd>
+
+        <dt>
+
+          <code><a href="plot_state_sequence.html">plot_state_sequence()</a></code>
+
+        </dt>
+        <dd>Plot a brain state sequence</dd>
+
+        <dt>
+
+          <code><a href="plot.dynR_leida.html">plot(<i>&lt;dynR_leida&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot method for dynR_leida objects</dd>
+
+        <dt>
+
+          <code><a href="plot.dynR_sw.html">plot(<i>&lt;dynR_sw&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot method for dynR_sw objects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="multi-subject-analysis">Multi-subject analysis<a class="anchor" aria-label="anchor" href="#multi-subject-analysis"></a></h2>
+
+      <div class="section-desc"><p>Batch processing across participants and stacking for cross-subject clustering.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="batch_leida.html">batch_leida()</a></code>
+
+        </dt>
+        <dd>Batch LEiDA pipeline across subjects</dd>
+
+        <dt>
+
+          <code><a href="batch_sw.html">batch_sw()</a></code>
+
+        </dt>
+        <dd>Batch sliding-window pipeline across subjects</dd>
+
+        <dt>
+
+          <code><a href="stack_leida.html">stack_leida()</a></code>
+
+        </dt>
+        <dd>Stack LEiDA eigenvectors across subjects</dd>
+
+        <dt>
+
+          <code><a href="stack_synchrony.html">stack_synchrony()</a></code>
+
+        </dt>
+        <dd>Stack synchrony vectors across subjects</dd>
       </dl></div><div class="section level2">
       <h2 id="utilities">Utilities<a class="anchor" aria-label="anchor" href="#utilities"></a></h2>
 

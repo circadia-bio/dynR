@@ -114,7 +114,7 @@
 
     <a class="navbar-brand me-2" href="index.html">dynR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -153,7 +153,7 @@
 </h1>
 </div>
 <p>An R port of the Python <a href="https://github.com/LucasFranca/dynfc" class="external-link">dynfc</a> library for computing <strong>dynamic connectivity (dynFC)</strong> representations from multivariate neurophysiological timeseries — BOLD fMRI, EEG, LFP, and related signals.</p>
-<p><a href="https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R CMD CHECK"></a> <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <a href="https://www.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R-%E2%89%A54.1-276DC3.svg" alt="R"></a> <a href="https://github.com/circadia-bio/dynR" class="external-link"><img src="https://img.shields.io/badge/version-0.1.4-lightgrey" alt="Version"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></p>
+<p><a href="https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R CMD CHECK"></a> <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <a href="https://www.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R-%E2%89%A54.1-276DC3.svg" alt="R"></a> <a href="https://github.com/circadia-bio/dynR" class="external-link"><img src="https://img.shields.io/badge/version-0.1.5-lightgrey" alt="Version"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></p>
 <hr>
 <blockquote>
 <p>⚠️ <strong>dynR is in early development and has not been formally tested.</strong> The API may change without notice, estimation results have not yet been validated against a reference implementation, and the package has not undergone peer review. Use with caution and verify outputs independently before using in any research context.</p>
@@ -184,6 +184,32 @@
 <div class="section level2">
 <h2 id="sparkles-features">✨ Features<a class="anchor" aria-label="anchor" href="#sparkles-features"></a>
 </h2>
+<div class="section level3">
+<h3 id="pipelines">Pipelines<a class="anchor" aria-label="anchor" href="#pipelines"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Function</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/leida_pipeline.html">leida_pipeline()</a></code></td>
+<td>Filter → Hilbert → dPL + LEiDA → Kuramoto in one call; returns <code>dynR_leida</code>
+</td>
+</tr>
+<tr>
+<td><code><a href="reference/sw_pipeline.html">sw_pipeline()</a></code></td>
+<td>Filter → sliding-window FC → cofluctuations in one call; returns <code>dynR_sw</code>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section level3">
 <h3 id="phase-based-methods">Phase-based methods<a class="anchor" aria-label="anchor" href="#phase-based-methods"></a>
 </h3>
@@ -285,6 +311,70 @@
 <td>First-order Markov transition probabilities between brain states</td>
 </tr></tbody>
 </table>
+</div>
+<div class="section level3">
+<h3 id="visualisation">Visualisation<a class="anchor" aria-label="anchor" href="#visualisation"></a>
+</h3>
+<table class="table">
+<thead><tr>
+<th>Function</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/plot_fc.html">plot_fc()</a></code></td>
+<td>FC matrix heatmap (dynR diverging palette)</td>
+</tr>
+<tr>
+<td><code><a href="reference/plot_synchrony.html">plot_synchrony()</a></code></td>
+<td>Kuramoto R(t) time series</td>
+</tr>
+<tr>
+<td><code><a href="reference/plot_state_sequence.html">plot_state_sequence()</a></code></td>
+<td>Brain state tile plot</td>
+</tr>
+<tr>
+<td><code><a href="reference/plot.dynR_leida.html">plot.dynR_leida()</a></code></td>
+<td>S3 plot method for <code><a href="reference/leida_pipeline.html">leida_pipeline()</a></code> output</td>
+</tr>
+<tr>
+<td><code><a href="reference/plot.dynR_sw.html">plot.dynR_sw()</a></code></td>
+<td>S3 plot method for <code><a href="reference/sw_pipeline.html">sw_pipeline()</a></code> output</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="multi-subject-analysis">Multi-subject analysis<a class="anchor" aria-label="anchor" href="#multi-subject-analysis"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Function</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/batch_leida.html">batch_leida()</a></code></td>
+<td>Run <code><a href="reference/leida_pipeline.html">leida_pipeline()</a></code> across a list or 3-D array of subjects</td>
+</tr>
+<tr>
+<td><code><a href="reference/batch_sw.html">batch_sw()</a></code></td>
+<td>Run <code><a href="reference/sw_pipeline.html">sw_pipeline()</a></code> across a list or 3-D array of subjects</td>
+</tr>
+<tr>
+<td><code><a href="reference/stack_leida.html">stack_leida()</a></code></td>
+<td>Stack LEiDA eigenvectors for cross-subject K-means clustering</td>
+</tr>
+<tr>
+<td><code><a href="reference/stack_synchrony.html">stack_synchrony()</a></code></td>
+<td>Tidy long-format synchrony table across subjects</td>
+</tr>
+</tbody>
+</table>
 <hr>
 </div>
 </div>
@@ -358,24 +448,41 @@
 <span></span>
 <span><span class="co"># Simulated timeseries: 80 channels, 300 timepoints</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">ts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">80</span> <span class="op">*</span> <span class="fl">300</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">80</span>, ncol <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span>
+<span><span class="va">ts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">80</span> <span class="op">*</span> <span class="fl">300</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">80</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 1. Bandpass filter (e.g. fMRI: TR = 2 s, 0.01–0.1 Hz)</span></span>
-<span><span class="va">ts_filt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">ts</span>, <span class="fl">1</span>, <span class="va">bandpass_filter</span>, flp <span class="op">=</span> <span class="fl">0.01</span>, fhi <span class="op">=</span> <span class="fl">0.1</span>, delt <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">ts_filt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span></span>
+<span><span class="co"># Pipeline wrappers — full analysis in one call</span></span>
+<span><span class="co"># Supply flp/fhi/delt for your modality; pass filter = FALSE if pre-filtered</span></span>
+<span><span class="va">res_leida</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/leida_pipeline.html">leida_pipeline</a></span><span class="op">(</span><span class="va">ts</span>, flp <span class="op">=</span> <span class="fl">0.01</span>, fhi <span class="op">=</span> <span class="fl">0.1</span>, delt <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>  <span class="co"># fMRI example</span></span>
+<span><span class="va">res_sw</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/sw_pipeline.html">sw_pipeline</a></span><span class="op">(</span><span class="va">ts</span>, window <span class="op">=</span> <span class="fl">30</span>, step <span class="op">=</span> <span class="fl">5</span>, flp <span class="op">=</span> <span class="fl">0.01</span>, fhi <span class="op">=</span> <span class="fl">0.1</span>, delt <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Inspect</span></span>
+<span><span class="va">res_leida</span>            <span class="co"># &lt;dynR_leida&gt; — N, Tmax, metastability, entropy</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_leida</span><span class="op">)</span>      <span class="co"># Kuramoto R(t)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_sw</span>, <span class="st">"fc"</span><span class="op">)</span>   <span class="co"># Mean sliding-window FC</span></span>
+<span></span>
+<span><span class="co"># Cluster LEiDA eigenvectors and visualise the state sequence</span></span>
+<span><span class="va">km</span>     <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans</a></span><span class="op">(</span><span class="va">res_leida</span><span class="op">$</span><span class="va">leida</span>, centers <span class="op">=</span> <span class="fl">5</span>, nstart <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/plot_state_sequence.html">plot_state_sequence</a></span><span class="op">(</span><span class="va">km</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Multi-subject: list or [N × Tmax × subjects] array</span></span>
+<span><span class="va">batch</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/batch_leida.html">batch_leida</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>sub01 <span class="op">=</span> <span class="va">ts</span>, sub02 <span class="op">=</span> <span class="va">ts</span><span class="op">)</span>, filter <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">df_sync</span>  <span class="op">&lt;-</span> <span class="fu"><a href="reference/stack_synchrony.html">stack_synchrony</a></span><span class="op">(</span><span class="va">batch</span><span class="op">)</span>   <span class="co"># tidy: subject / timepoint / synchrony</span></span>
+<span><span class="va">leida_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/stack_leida.html">stack_leida</a></span><span class="op">(</span><span class="va">batch</span><span class="op">)</span>      <span class="co"># ready for cross-subject kmeans</span></span></code></pre></div>
+<details><summary>
+Step-by-step (without pipeline wrappers)
+</summary><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1. Bandpass filter (fMRI: TR = 2 s, 0.01–0.1 Hz)</span></span>
+<span><span class="va">ts_filt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">ts</span>, <span class="fl">1</span>, <span class="va">bandpass_filter</span>, flp <span class="op">=</span> <span class="fl">0.01</span>, fhi <span class="op">=</span> <span class="fl">0.1</span>, delt <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 2. Phase-based: LEiDA + Kuramoto</span></span>
 <span><span class="va">phases</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hilbert_phases.html">hilbert_phases</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span></span>
-<span><span class="va">dpl</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/dyn_phase_lock.html">dyn_phase_lock</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span>   <span class="co"># dpl$leida: [280 × 80] LEiDA eigenvectors</span></span>
+<span><span class="va">dpl</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/dyn_phase_lock.html">dyn_phase_lock</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span>   <span class="co"># dpl$leida: [Tmax-20 × 80]</span></span>
 <span><span class="va">kop</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/kuramoto.html">kuramoto</a></span><span class="op">(</span><span class="va">phases</span><span class="op">)</span>         <span class="co"># kop$metastability, kop$entropy</span></span>
 <span></span>
-<span><span class="co"># 3. Cluster LEiDA vectors → feed into stateR</span></span>
-<span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans</a></span><span class="op">(</span><span class="va">dpl</span><span class="op">$</span><span class="va">leida</span>, centers <span class="op">=</span> <span class="fl">5</span>, nstart <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 4. Correlation-based: sliding-window FC + cofluctuations</span></span>
+<span><span class="co"># 3. Correlation-based: sliding-window FC + cofluctuations</span></span>
 <span><span class="va">sw</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/corr_slide.html">corr_slide</a></span><span class="op">(</span><span class="va">ts_filt</span>, window <span class="op">=</span> <span class="fl">30</span>, step <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">ec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cofluct.html">cofluct</a></span><span class="op">(</span><span class="va">ts_filt</span><span class="op">)</span>             <span class="co"># ec$edge_ts, ec$rss</span></span></code></pre></div>
-<hr>
+</details><hr>
 </div>
 <div class="section level2">
 <h2 id="triangular_ruler-data-conventions">📐 Data conventions<a class="anchor" aria-label="anchor" href="#triangular_ruler-data-conventions"></a>

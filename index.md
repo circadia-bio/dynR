@@ -10,7 +10,7 @@ CHECK](https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml/b
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://dynr.circadia-lab.uk/LICENSE)
 [![R](https://img.shields.io/badge/R-%E2%89%A54.1-276DC3.svg)](https://www.r-project.org/)
-[![Version](https://img.shields.io/badge/version-0.1.4-lightgrey)](https://github.com/circadia-bio/dynR)
+[![Version](https://img.shields.io/badge/version-0.1.5-lightgrey)](https://github.com/circadia-bio/dynR)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
@@ -60,6 +60,13 @@ quantification (fractional occupancy, dwell time, Markov transitions).
 
 ## ✨ Features
 
+### Pipelines
+
+| Function | Description |
+|----|----|
+| [`leida_pipeline()`](https://dynr.circadia-lab.uk/reference/leida_pipeline.md) | Filter → Hilbert → dPL + LEiDA → Kuramoto in one call; returns `dynR_leida` |
+| [`sw_pipeline()`](https://dynr.circadia-lab.uk/reference/sw_pipeline.md) | Filter → sliding-window FC → cofluctuations in one call; returns `dynR_sw` |
+
 ### Phase-based methods
 
 | Function | Description |
@@ -90,6 +97,25 @@ quantification (fractional occupancy, dwell time, Markov transitions).
 | Function | Description |
 |----|----|
 | [`dyn_transitions()`](https://dynr.circadia-lab.uk/reference/dyn_transitions.md) | First-order Markov transition probabilities between brain states |
+
+### Visualisation
+
+| Function | Description |
+|----|----|
+| [`plot_fc()`](https://dynr.circadia-lab.uk/reference/plot_fc.md) | FC matrix heatmap (dynR diverging palette) |
+| [`plot_synchrony()`](https://dynr.circadia-lab.uk/reference/plot_synchrony.md) | Kuramoto R(t) time series |
+| [`plot_state_sequence()`](https://dynr.circadia-lab.uk/reference/plot_state_sequence.md) | Brain state tile plot |
+| [`plot.dynR_leida()`](https://dynr.circadia-lab.uk/reference/plot.dynR_leida.md) | S3 plot method for [`leida_pipeline()`](https://dynr.circadia-lab.uk/reference/leida_pipeline.md) output |
+| [`plot.dynR_sw()`](https://dynr.circadia-lab.uk/reference/plot.dynR_sw.md) | S3 plot method for [`sw_pipeline()`](https://dynr.circadia-lab.uk/reference/sw_pipeline.md) output |
+
+### Multi-subject analysis
+
+| Function | Description |
+|----|----|
+| [`batch_leida()`](https://dynr.circadia-lab.uk/reference/batch_leida.md) | Run [`leida_pipeline()`](https://dynr.circadia-lab.uk/reference/leida_pipeline.md) across a list or 3-D array of subjects |
+| [`batch_sw()`](https://dynr.circadia-lab.uk/reference/batch_sw.md) | Run [`sw_pipeline()`](https://dynr.circadia-lab.uk/reference/sw_pipeline.md) across a list or 3-D array of subjects |
+| [`stack_leida()`](https://dynr.circadia-lab.uk/reference/stack_leida.md) | Stack LEiDA eigenvectors for cross-subject K-means clustering |
+| [`stack_synchrony()`](https://dynr.circadia-lab.uk/reference/stack_synchrony.md) | Tidy long-format synchrony table across subjects |
 
 ------------------------------------------------------------------------
 
@@ -136,21 +162,41 @@ library(dynR)
 
 # Simulated timeseries: 80 channels, 300 timepoints
 set.seed(42)
-ts <- matrix(rnorm(80 * 300), nrow = 80, ncol = 300)
+ts <- matrix(rnorm(80 * 300), nrow = 80)
 
-# 1. Bandpass filter (e.g. fMRI: TR = 2 s, 0.01–0.1 Hz)
-ts_filt <- apply(ts, 1, bandpass_filter, flp = 0.01, fhi = 0.1, delt = 2)
-ts_filt <- t(ts_filt)
+# Pipeline wrappers — full analysis in one call
+# Supply flp/fhi/delt for your modality; pass filter = FALSE if pre-filtered
+res_leida <- leida_pipeline(ts, flp = 0.01, fhi = 0.1, delt = 2)  # fMRI example
+res_sw    <- sw_pipeline(ts, window = 30, step = 5, flp = 0.01, fhi = 0.1, delt = 2)
+
+# Inspect
+res_leida            # <dynR_leida> — N, Tmax, metastability, entropy
+plot(res_leida)      # Kuramoto R(t)
+plot(res_sw, "fc")   # Mean sliding-window FC
+
+# Cluster LEiDA eigenvectors and visualise the state sequence
+km     <- kmeans(res_leida$leida, centers = 5, nstart = 100)
+plot_state_sequence(km$cluster)
+
+# Multi-subject: list or [N × Tmax × subjects] array
+batch    <- batch_leida(list(sub01 = ts, sub02 = ts), filter = FALSE)
+df_sync  <- stack_synchrony(batch)   # tidy: subject / timepoint / synchrony
+leida_all <- stack_leida(batch)      # ready for cross-subject kmeans
+```
+
+Step-by-step (without pipeline wrappers)
+
+``` r
+
+# 1. Bandpass filter (fMRI: TR = 2 s, 0.01–0.1 Hz)
+ts_filt <- t(apply(ts, 1, bandpass_filter, flp = 0.01, fhi = 0.1, delt = 2))
 
 # 2. Phase-based: LEiDA + Kuramoto
 phases <- hilbert_phases(ts_filt)
-dpl    <- dyn_phase_lock(phases)   # dpl$leida: [280 × 80] LEiDA eigenvectors
+dpl    <- dyn_phase_lock(phases)   # dpl$leida: [Tmax-20 × 80]
 kop    <- kuramoto(phases)         # kop$metastability, kop$entropy
 
-# 3. Cluster LEiDA vectors → feed into stateR
-km <- kmeans(dpl$leida, centers = 5, nstart = 100)
-
-# 4. Correlation-based: sliding-window FC + cofluctuations
+# 3. Correlation-based: sliding-window FC + cofluctuations
 sw <- corr_slide(ts_filt, window = 30, step = 5)
 ec <- cofluct(ts_filt)             # ec$edge_ts, ec$rss
 ```

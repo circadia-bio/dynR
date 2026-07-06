@@ -2,6 +2,7 @@
 <url><loc>https://dynr.circadia-lab.uk/404.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/LICENSE-text.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/LICENSE.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/ROADMAP.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/articles/getting-started.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/articles/index.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/articles/phase-based-fc.html</loc></url>
@@ -10,6 +11,8 @@
 <url><loc>https://dynr.circadia-lab.uk/index.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/news/index.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/reference/bandpass_filter.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/batch_leida.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/batch_sw.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/reference/cofluct.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/reference/corr_corr.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/reference/corr_slide.html</loc></url>
@@ -26,7 +29,16 @@
 <url><loc>https://dynr.circadia-lab.uk/reference/index.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/reference/kuramoto.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/reference/kuramoto_sync_cpp.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/leida_pipeline.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/plot.dynR_leida.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/plot.dynR_sw.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/plot_fc.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/plot_state_sequence.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/plot_synchrony.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/reference/shannon_entropy.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/stack_leida.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/stack_synchrony.html</loc></url>
+<url><loc>https://dynr.circadia-lab.uk/reference/sw_pipeline.html</loc></url>
 <url><loc>https://dynr.circadia-lab.uk/reference/ts.html</loc></url>
 </urlset>
 
