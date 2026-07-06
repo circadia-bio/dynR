@@ -1,5 +1,3 @@
-# NEWS.md
-
 ## dynR 0.1.5
 
 ### New functions
