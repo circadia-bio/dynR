@@ -4,9 +4,14 @@
 #' the analytic signal (Hilbert transform). Each parcel timeseries is
 #' demeaned before transformation.
 #'
-#' The analytic signal is computed by `.hilbert_r()`, a bespoke port of
-#' `scipy.signal.hilbert()` that uses only base-R `fft()` and requires no
-#' external packages.
+#' All N parcels are processed in two vectorised calls to [mvfft()] rather
+#' than an N-iteration R loop over [fft()]: the timeseries matrix is transposed
+#' to a Tmax x N layout so `mvfft` applies the FFT to each parcel column
+#' simultaneously, the Hilbert multiplier is broadcast across columns, and
+#' the inverse FFT recovers the analytic signal for all parcels at once.
+#'
+#' `.hilbert_r()` is retained as an internal single-vector reference
+#' (scipy-parity validated).
 #'
 #' @param timeseries Numeric matrix \[N x Tmax\]. BOLD signal with N parcels
 #'   as rows and Tmax timepoints as columns.
@@ -26,39 +31,47 @@
 #' phases <- hilbert_phases(ts)
 #' dim(phases)  # 10 x 200
 hilbert_phases <- function(timeseries) {
-  N    <- nrow(timeseries)
   Tmax <- ncol(timeseries)
-  phases <- matrix(0, nrow = N, ncol = Tmax)
-  for (i in seq_len(N)) {
-    x_c        <- timeseries[i, ] - mean(timeseries[i, ])
-    phases[i, ] <- Arg(.hilbert_r(x_c))
+
+  # Demean each parcel (row) in one vectorised step
+  ts_zero <- timeseries - rowMeans(timeseries)
+
+  # mvfft expects columns -> transpose to Tmax x N
+  Xf <- mvfft(t(ts_zero))
+
+  # Hilbert one-sided multiplier (same for every parcel)
+  h <- numeric(Tmax)
+  h[1L] <- 1.0
+  if (Tmax %% 2L == 0L) {
+    h[Tmax %/% 2L + 1L] <- 1.0
+    h[2L:(Tmax %/% 2L)] <- 2.0
+  } else {
+    h[2L:((Tmax + 1L) %/% 2L)] <- 2.0
   }
-  phases
+
+  # h is recycled column-by-column over the Tmax x N matrix: each column
+  # (parcel) gets multiplied by the same h vector
+  Xan <- mvfft(Xf * h, inverse = TRUE) / Tmax
+
+  # Phases: Arg of analytic signal, transposed back to N x Tmax
+  t(Arg(Xan))
 }
 
-# ── Internal helpers (not exported) ──────────────────────────────────────────
+# ── Internal reference implementation (not exported) ─────────────────────────
 
-# Analytic signal via FFT. Equivalent to scipy.signal.hilbert() and
-# gsignal::hilbert(). Returns a complex vector of the same length as x.
-#
-# Algorithm: FFT -> zero the negative-frequency components (multiply by h)
-# -> IFFT. The one-sided spectrum multiplier h is:
-#   h[1]           = 1  (DC)
-#   h[2 : N/2]     = 2  (positive freqs, doubled to preserve energy)
-#   h[N/2 + 1]     = 1  (Nyquist, N even only)
-#   h[N/2 + 2 : N] = 0  (negative freqs, zeroed)
-# For odd N the Nyquist bin does not exist; positive freqs run to (N+1)/2.
+# Single-vector analytic signal via FFT. Equivalent to scipy.signal.hilbert().
+# Retained for parity validation; hilbert_phases() uses the vectorised path.
 .hilbert_r <- function(x) {
   n  <- length(x)
   Xf <- fft(x)
   h  <- numeric(n)
   if (n %% 2L == 0L) {
-    h[1L]           <- 1.0           # DC
-    h[n %/% 2L + 1L] <- 1.0          # Nyquist
-    h[2L:(n %/% 2L)] <- 2.0          # positive frequencies
+    h[1L]             <- 1.0
+    h[n %/% 2L + 1L]  <- 1.0
+    h[2L:(n %/% 2L)]  <- 2.0
   } else {
-    h[1L]                    <- 1.0   # DC
-    h[2L:((n + 1L) %/% 2L)] <- 2.0   # positive frequencies
+    h[1L]                    <- 1.0
+    h[2L:((n + 1L) %/% 2L)] <- 2.0
   }
   fft(Xf * h, inverse = TRUE) / n
 }
