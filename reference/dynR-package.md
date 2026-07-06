@@ -21,6 +21,9 @@ Useful links:
 
 Authors:
 
+- Lucas França <lucas.franca@northumbria.ac.uk>
+  ([ORCID](https://orcid.org/0000-0003-0853-1319))
+
 - Mario Leocadio-Miguel <mario.miguel@northumbria.ac.uk>
   ([ORCID](https://orcid.org/0000-0002-7248-3529))
 
