@@ -167,6 +167,12 @@ reference:
       - ts
       - fc
 
+  - title: "Pipelines"
+    desc: "High-level wrappers running the full phase-based or correlation-based pipeline in one call."
+    contents:
+      - leida_pipeline
+      - sw_pipeline
+
   - title: "Signal preprocessing"
     desc: "Filter and prepare BOLD timeseries prior to dynFC analysis."
     contents:
@@ -191,6 +197,23 @@ reference:
     desc: "Quantify the temporal structure of brain-state sequences."
     contents:
       - dyn_transitions
+
+  - title: "Visualisation"
+    desc: "Plot FC matrices, synchrony time series, and brain state sequences."
+    contents:
+      - plot_fc
+      - plot_synchrony
+      - plot_state_sequence
+      - plot.dynR_leida
+      - plot.dynR_sw
+
+  - title: "Multi-subject analysis"
+    desc: "Batch processing across participants and stacking for cross-subject clustering."
+    contents:
+      - batch_leida
+      - batch_sw
+      - stack_leida
+      - stack_synchrony
 
   - title: "Utilities"
     desc: "Entropy and distance helpers."
