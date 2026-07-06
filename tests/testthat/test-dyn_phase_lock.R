@@ -67,3 +67,24 @@ test_that("get_leida: sign convention (row sums <= 0)", {
   row_sums <- rowSums(res$leida)
   expect_true(all(row_sums <= 1e-10))
 })
+
+test_that("dyn_phase_lock_cpp: bit-perfect vs R outer() reference", {
+  # Confirms the C++ cos(phi_i - phi_j) loop produces identical
+  # floating-point values to the R outer() reference implementation.
+  set.seed(7)
+  N    <- 20L
+  Tmax <- 100L
+  ts   <- matrix(rnorm(N * Tmax), nrow = N)
+  ph   <- hilbert_phases(ts)
+
+  res <- dyn_phase_lock(ph)
+
+  T_idx    <- seq(11L, Tmax - 10L)
+  sync_ref <- array(0, dim = c(N, N, length(T_idx)))
+  for (t in seq_along(T_idx)) {
+    v <- ph[, T_idx[t]]
+    sync_ref[, , t] <- outer(v, v, function(a, b) cos(a - b))
+  }
+
+  expect_true(max(abs(res$sync_conn - sync_ref)) == 0)
+})
