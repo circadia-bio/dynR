@@ -8,9 +8,9 @@ sw_pipeline(
   timeseries,
   window,
   step = NULL,
-  flp = 0.01,
-  fhi = 0.1,
-  delt = 2,
+  flp = NULL,
+  fhi = NULL,
+  delt = NULL,
   order = 2L,
   filter = TRUE
 )
@@ -23,7 +23,16 @@ sw_pipeline(
 \item{step}{Integer. Step between window onsets. Default: \code{window}
 (non-overlapping windows).}
 
-\item{flp, fhi, delt, order}{Filter parameters passed to \code{\link[=bandpass_filter]{bandpass_filter()}}.}
+\item{flp}{Numeric. Low-pass cutoff (Hz). No default — required when
+\code{filter = TRUE}.}
+
+\item{fhi}{Numeric. High-pass cutoff (Hz). No default — required when
+\code{filter = TRUE}.}
+
+\item{delt}{Numeric. Sampling interval in seconds. No default — required
+when \code{filter = TRUE}.}
+
+\item{order}{Integer. Butterworth filter order. Default \code{2L}.}
 
 \item{filter}{Logical. Apply bandpass filter? Default \code{TRUE}.}
 }
@@ -35,20 +44,32 @@ An object of class \code{dynR_sw} (a named list) with elements:
 \item{rss}{Numeric vector [Tmax]. Root-sum-square cofluctuation.}
 \item{window}{Integer. Window size used.}
 \item{step}{Integer. Step size used.}
-\item{N}{Integer. Number of parcels.}
+\item{N}{Integer. Number of channels/parcels.}
 \item{Tmax}{Integer. Number of timepoints.}
 }
 \description{
 Convenience wrapper running the full correlation-based dynamic FC pipeline:
-optional Butterworth bandpass filter → sliding-window Pearson correlation
-matrices → edge-centric cofluctuations. Returns a structured \code{dynR_sw}
+optional Butterworth bandpass filter -> sliding-window Pearson correlation
+matrices -> edge-centric cofluctuations. Returns a structured \code{dynR_sw}
 object with \code{print()} and \code{plot()} methods.
+}
+\details{
+dynR is modality-agnostic. \code{flp}, \code{fhi}, and \code{delt} have no defaults and
+\strong{must} be supplied when \code{filter = TRUE}. Pass \code{filter = FALSE} if the
+timeseries is already band-limited.
 }
 \examples{
 set.seed(1)
 ts <- matrix(rnorm(10 * 200), nrow = 10)
+
+# filter = FALSE: timeseries already band-limited
 res <- sw_pipeline(ts, window = 20, filter = FALSE)
 res
+
+# fMRI BOLD (TR = 2 s)
+\dontrun{
+res <- sw_pipeline(ts, window = 20, flp = 0.01, fhi = 0.1, delt = 2)
+}
 }
 \seealso{
 \code{leida_pipeline()}, \code{corr_slide()}, \code{cofluct()}, \code{plot.dynR_sw()}

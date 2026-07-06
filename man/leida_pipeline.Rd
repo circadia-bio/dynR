@@ -6,24 +6,27 @@
 \usage{
 leida_pipeline(
   timeseries,
-  flp = 0.01,
-  fhi = 0.1,
-  delt = 2,
+  flp = NULL,
+  fhi = NULL,
+  delt = NULL,
   order = 2L,
   filter = TRUE
 )
 }
 \arguments{
-\item{timeseries}{Numeric matrix [N x Tmax]. BOLD signal with N parcels
-as rows and Tmax timepoints as columns.}
+\item{timeseries}{Numeric matrix [N x Tmax]. Rows = channels/parcels,
+columns = timepoints.}
 
-\item{flp}{Numeric. Low-pass cutoff frequency (Hz). Default 0.01.}
+\item{flp}{Numeric. Low-pass cutoff frequency (Hz). No default — must be
+set explicitly when \code{filter = TRUE}.}
 
-\item{fhi}{Numeric. High-pass cutoff frequency (Hz). Default 0.1.}
+\item{fhi}{Numeric. High-pass cutoff frequency (Hz). No default — must be
+set explicitly when \code{filter = TRUE}.}
 
-\item{delt}{Numeric. Sampling interval in seconds (TR). Default 2.}
+\item{delt}{Numeric. Sampling interval in seconds (\code{1 / sampling_rate}).
+No default — must be set explicitly when \code{filter = TRUE}.}
 
-\item{order}{Integer. Butterworth filter order. Default 2.}
+\item{order}{Integer. Butterworth filter order. Default \code{2L}.}
 
 \item{filter}{Logical. Apply bandpass filter before phase extraction?
 Default \code{TRUE}. Set to \code{FALSE} if the timeseries is already filtered.}
@@ -36,21 +39,39 @@ An object of class \code{dynR_leida} (a named list) with elements:
 \item{synchrony}{Numeric vector [Tmax-20]. Kuramoto R(t).}
 \item{metastability}{Numeric. Standard deviation of synchrony.}
 \item{entropy}{Numeric. Shannon entropy of synchrony series (bits).}
-\item{N}{Integer. Number of parcels.}
+\item{N}{Integer. Number of channels/parcels.}
 \item{Tmax}{Integer. Number of timepoints.}
 }
 \description{
 Convenience wrapper running the full phase-based dynamic FC pipeline:
-optional Butterworth bandpass filter → Hilbert transform →
-dynamic phase-locking matrices + LEiDA eigenvectors → Kuramoto order
+optional Butterworth bandpass filter -> Hilbert transform ->
+dynamic phase-locking matrices + LEiDA eigenvectors -> Kuramoto order
 parameter. Returns a structured \code{dynR_leida} object with \code{print()} and
 \code{plot()} methods.
+}
+\details{
+dynR is modality-agnostic. \code{flp}, \code{fhi}, and \code{delt} have no defaults and
+\strong{must} be supplied when \code{filter = TRUE}. Set them for your recording
+modality (see examples). Pass \code{filter = FALSE} if the timeseries is already
+band-limited.
 }
 \examples{
 set.seed(1)
 ts <- matrix(rnorm(10 * 200), nrow = 10)
+
+# filter = FALSE: timeseries already band-limited
 res <- leida_pipeline(ts, filter = FALSE)
 res
+
+# fMRI BOLD (TR = 2 s)
+\dontrun{
+res <- leida_pipeline(ts, flp = 0.01, fhi = 0.1, delt = 2)
+}
+
+# EEG alpha band (250 Hz)
+\dontrun{
+res <- leida_pipeline(ts, flp = 8, fhi = 12, delt = 1 / 250)
+}
 }
 \seealso{
 \code{sw_pipeline()}, \code{dyn_phase_lock()}, \code{kuramoto()}, \code{plot.dynR_leida()}
