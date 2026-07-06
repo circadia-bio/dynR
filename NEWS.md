@@ -8,12 +8,12 @@
   Return S3 objects (`dynR_leida` / `dynR_sw`) with `print()` and `plot()`
   methods.
 
-* `plot_fc()`: FC matrix heatmap using the circadia diverging palette
-  (deep blue -> antique white -> coral).
+* `plot_fc()`: FC matrix heatmap using the dynR diverging palette
+  (deep indigo -> periwinkle -> brick red).
 
 * `plot_synchrony()`: Kuramoto R(t) time series with mean reference line.
 
-* `plot_state_sequence()`: brain state tile plot with circadia state colours.
+* `plot_state_sequence()`: brain state tile plot with dynR state palette.
 
 * `plot.dynR_leida()` / `plot.dynR_sw()`: S3 plot methods for pipeline
   outputs; dispatch to `plot_synchrony()` / `plot_fc()` or the RSS plot
