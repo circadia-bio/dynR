@@ -50,3 +50,29 @@ test_that("corr_slide: matrices are symmetric", {
     expect_equal(res$corr_mats[, , w], t(res$corr_mats[, , w]), tolerance = 1e-12)
   }
 })
+
+test_that("corr_slide_cpp: matches R cor() reference to machine precision", {
+  # Confirms the C++ Pearson implementation agrees with R's cor() to
+  # well within machine precision. Tests both non-overlapping and
+  # overlapping (step < window) cases.
+  set.seed(7)
+  N    <- 20L
+  Tmax <- 120L
+  ts   <- matrix(rnorm(N * Tmax), nrow = N)
+
+  for (step in c(20L, 10L, 5L)) {
+    res_cpp <- corr_slide(ts, window = 20L, step = step)
+
+    # R reference
+    idx_r <- seq(1L, Tmax, by = step)
+    idx_r <- idx_r[idx_r + 20L - 1L <= Tmax]
+    ref   <- array(0, dim = c(N, N, length(idx_r)))
+    for (w in seq_along(idx_r)) {
+      seg        <- ts[, idx_r[w]:(idx_r[w] + 19L), drop = FALSE]
+      ref[, , w] <- cor(t(seg))
+    }
+
+    expect_equal(res_cpp$corr_mats, ref,          tolerance = 1e-10)
+    expect_equal(res_cpp$idx,       idx_r)
+  }
+})

@@ -10,6 +10,19 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// corr_slide_cpp
+List corr_slide_cpp(NumericMatrix timeseries, int window, int step);
+RcppExport SEXP _dynR_corr_slide_cpp(SEXP timeseriesSEXP, SEXP windowSEXP, SEXP stepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type timeseries(timeseriesSEXP);
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< int >::type step(stepSEXP);
+    rcpp_result_gen = Rcpp::wrap(corr_slide_cpp(timeseries, window, step));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dyn_phase_lock_cpp
 NumericVector dyn_phase_lock_cpp(NumericMatrix phases);
 RcppExport SEXP _dynR_dyn_phase_lock_cpp(SEXP phasesSEXP) {
@@ -45,6 +58,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_dynR_corr_slide_cpp", (DL_FUNC) &_dynR_corr_slide_cpp, 3},
     {"_dynR_dyn_phase_lock_cpp", (DL_FUNC) &_dynR_dyn_phase_lock_cpp, 1},
     {"_dynR_get_leida_cpp", (DL_FUNC) &_dynR_get_leida_cpp, 1},
     {"_dynR_kuramoto_sync_cpp", (DL_FUNC) &_dynR_kuramoto_sync_cpp, 1},
