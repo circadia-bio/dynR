@@ -7,16 +7,26 @@
 hilbert_phases(timeseries)
 }
 \arguments{
-\item{timeseries}{Numeric matrix [N × Tmax]. BOLD signal with N parcels
+\item{timeseries}{Numeric matrix [N x Tmax]. BOLD signal with N parcels
 as rows and Tmax timepoints as columns.}
 }
 \value{
-Numeric matrix [N × Tmax]. Instantaneous phases in radians.
+Numeric matrix [N x Tmax]. Instantaneous phases in radians.
 }
 \description{
 Compute the instantaneous phase time series for all parcels/voxels via
 the analytic signal (Hilbert transform). Each parcel timeseries is
 demeaned before transformation.
+}
+\details{
+All N parcels are processed in two vectorised calls to \code{\link[=mvfft]{mvfft()}} rather
+than an N-iteration R loop over \code{\link[=fft]{fft()}}: the timeseries matrix is transposed
+to a Tmax x N layout so \code{mvfft} applies the FFT to each parcel column
+simultaneously, the Hilbert multiplier is broadcast across columns, and
+the inverse FFT recovers the analytic signal for all parcels at once.
+
+\code{.hilbert_r()} is retained as an internal single-vector reference
+(scipy-parity validated).
 }
 \examples{
 set.seed(1)

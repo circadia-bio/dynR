@@ -6,7 +6,7 @@
 #' transform.
 #'
 #' The phase-locking computation is accelerated by a compiled C++ backend
-#' ([dyn_phase_lock_cpp()]): only the upper triangle is evaluated with
+#' (`dyn_phase_lock_cpp()`): only the upper triangle is evaluated with
 #' `cos(phi_i - phi_j)` and mirrored to the lower, halving trigonometric
 #' operations relative to a naive double loop.
 #'

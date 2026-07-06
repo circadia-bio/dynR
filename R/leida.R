@@ -5,7 +5,7 @@
 #' its sum is non-positive, following the LEiDA convention.
 #'
 #' The computation is accelerated by a compiled C++ / LAPACK backend
-#' ([get_leida_cpp()]): LAPACK `dsyev` is called once per timepoint with a
+#' (`get_leida_cpp()`): LAPACK `dsyev` is called once per timepoint with a
 #' single shared workspace allocation, and only the leading eigenvector
 #' (last column of the ascending-order output) is retained.
 #'

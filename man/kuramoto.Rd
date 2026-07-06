@@ -7,7 +7,7 @@
 kuramoto(phases, base = 2, n_bits = 8L)
 }
 \arguments{
-\item{phases}{Numeric matrix [N × Tmax]. Instantaneous phases in radians,
+\item{phases}{Numeric matrix [N x Tmax]. Instantaneous phases in radians,
 as returned by \code{\link[=hilbert_phases]{hilbert_phases()}}.}
 
 \item{base}{Numeric. Logarithm base for Shannon entropy. Default is 2.}
@@ -28,6 +28,11 @@ Compute the global Kuramoto order parameter time series, the metastability
 index (standard deviation of the order parameter), and Shannon entropy of
 synchrony from parcel-level instantaneous phase time series.
 The first and last 10 timepoints are discarded (matching \code{\link[=dyn_phase_lock]{dyn_phase_lock()}}).
+}
+\details{
+The synchrony time series is computed by a compiled C++ backend
+(\code{kuramoto_sync_cpp()}) that accumulates cos and sin components directly,
+avoiding R complex-number allocation and \code{vapply} dispatch overhead.
 }
 \examples{
 set.seed(1)

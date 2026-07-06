@@ -22,6 +22,12 @@ series and extract leading eigenvectors via \code{\link[=get_leida]{get_leida()}
 last 10 timepoints are discarded to avoid edge effects from the Hilbert
 transform.
 }
+\details{
+The phase-locking computation is accelerated by a compiled C++ backend
+(\code{dyn_phase_lock_cpp()}): only the upper triangle is evaluated with
+\code{cos(phi_i - phi_j)} and mirrored to the lower, halving trigonometric
+operations relative to a naive double loop.
+}
 \examples{
 set.seed(1)
 ts <- matrix(rnorm(10 * 200), nrow = 10, ncol = 200)
@@ -37,6 +43,6 @@ during rest. \emph{Scientific Reports}, 7(1), 5135.
 \doi{10.1038/s41598-017-05425-7}
 
 Lord, L.-D. et al. (2019). Dynamical exploration of the repertoire of brain
-networks at rest is modulated by psilocybin. \emph{NeuroImage}, 199, 127–142.
+networks at rest is modulated by psilocybin. \emph{NeuroImage}, 199, 127-142.
 \doi{10.1016/j.neuroimage.2019.05.060}
 }

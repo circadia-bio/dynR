@@ -7,7 +7,7 @@
 corr_slide(timeseries, window, step = NULL)
 }
 \arguments{
-\item{timeseries}{Numeric matrix [N × Tmax]. BOLD signal with N parcels
+\item{timeseries}{Numeric matrix [N x Tmax]. BOLD signal with N parcels
 as rows and Tmax timepoints as columns.}
 
 \item{window}{Integer. Window size in timepoints.}
@@ -24,6 +24,13 @@ A list with:
 Compute functional connectivity matrices over sliding windows of a BOLD
 timeseries (Hansen et al., 2015).
 }
+\details{
+The correlation matrices are computed by a compiled C++ backend
+(\code{corr_slide_cpp()}) that calculates Pearson correlation directly on the
+input matrix. No per-window submatrix allocation or transposition is
+performed; the t-outer loop ordering exploits the column-major memory
+layout of the input for sequential cache access.
+}
 \examples{
 set.seed(1)
 ts <- matrix(rnorm(10 * 200), nrow = 10, ncol = 200)
@@ -32,6 +39,6 @@ dim(res$corr_mats)  # 10 x 10 x 10
 }
 \references{
 Hansen, E. C. A. et al. (2015). Functional connectivity dynamics: Modeling
-the switching behavior of the resting state. \emph{NeuroImage}, 105, 525–535.
+the switching behavior of the resting state. \emph{NeuroImage}, 105, 525-535.
 \doi{10.1016/j.neuroimage.2014.11.001}
 }

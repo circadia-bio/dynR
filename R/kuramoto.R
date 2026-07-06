@@ -6,7 +6,7 @@
 #' The first and last 10 timepoints are discarded (matching [dyn_phase_lock()]).
 #'
 #' The synchrony time series is computed by a compiled C++ backend
-#' ([kuramoto_sync_cpp()]) that accumulates cos and sin components directly,
+#' (`kuramoto_sync_cpp()`) that accumulates cos and sin components directly,
 #' avoiding R complex-number allocation and `vapply` dispatch overhead.
 #'
 #' @param phases Numeric matrix \[N x Tmax\]. Instantaneous phases in radians,

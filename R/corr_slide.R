@@ -4,7 +4,7 @@
 #' timeseries (Hansen et al., 2015).
 #'
 #' The correlation matrices are computed by a compiled C++ backend
-#' ([corr_slide_cpp()]) that calculates Pearson correlation directly on the
+#' (`corr_slide_cpp()`) that calculates Pearson correlation directly on the
 #' input matrix. No per-window submatrix allocation or transposition is
 #' performed; the t-outer loop ordering exploits the column-major memory
 #' layout of the input for sequential cache access.

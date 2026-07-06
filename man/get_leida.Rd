@@ -11,13 +11,19 @@ get_leida(sync_conn)
 matrices, as returned by \code{\link[=dyn_phase_lock]{dyn_phase_lock()}}.}
 }
 \value{
-Numeric matrix [Tmax × N]. Leading eigenvectors, one per
+Numeric matrix [Tmax x N]. Leading eigenvectors, one per
 timepoint.
 }
 \description{
 Extract the leading eigenvector from a series of instantaneous
 phase-locking matrices. The sign of each eigenvector is normalised so that
 its sum is non-positive, following the LEiDA convention.
+}
+\details{
+The computation is accelerated by a compiled C++ / LAPACK backend
+(\code{get_leida_cpp()}): LAPACK \code{dsyev} is called once per timepoint with a
+single shared workspace allocation, and only the leading eigenvector
+(last column of the ascending-order output) is retained.
 }
 \references{
 Cabral, J. et al. (2017). Cognitive performance in healthy older adults
@@ -26,6 +32,6 @@ during rest. \emph{Scientific Reports}, 7(1), 5135.
 \doi{10.1038/s41598-017-05425-7}
 
 Lord, L.-D. et al. (2019). Dynamical exploration of the repertoire of brain
-networks at rest is modulated by psilocybin. \emph{NeuroImage}, 199, 127–142.
+networks at rest is modulated by psilocybin. \emph{NeuroImage}, 199, 127-142.
 \doi{10.1016/j.neuroimage.2019.05.060}
 }

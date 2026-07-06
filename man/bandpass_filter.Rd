@@ -27,11 +27,20 @@ using scipy-compatible steady-state initial conditions (equivalent to
 \code{padtype = "odd"}).
 }
 \details{
-\code{gsignal::filtfilt()} uses zero initial conditions, which produces edge
-transients up to ~0.24 signal units on real fMRI data. This implementation
-replicates scipy's \code{lfilter_zi} approach: both the forward and backward
-passes are initialised at steady state scaled by the first sample of each
-pass, reducing edge error to machine precision.
+Two internal code paths are used depending on \code{order}:
+\itemize{
+\item \strong{\code{order <= 3}} (typical fMRI use): direct-form b/a coefficients with
+the companion-matrix initial-condition method. scipy \code{filtfilt}-parity
+validated to \verb{< 1e-9} for standard fMRI parameters.
+\item \strong{\code{order >= 4}}: second-order sections (SOS). The companion matrix for
+the full-order b/a representation becomes ill-conditioned for high-order
+filters with poles close to z = 1 (very low lower cutoff). SOS avoids
+this by decomposing the filter into biquad sections, each with a 2x2
+companion matrix that is always well-conditioned.
+}
+
+Filter coefficients are computed by \code{.butter_bandpass_zpk()}, a bespoke
+port of \code{scipy.signal.butter()} that requires no external packages.
 }
 \examples{
 set.seed(1)
