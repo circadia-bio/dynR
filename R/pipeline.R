@@ -5,20 +5,50 @@
   rep_len(c("#8D9FD7", "#9E3C30", "#754D71", "#341C5D", "#E19A8F"), k)
 }
 
+# Validate filter parameters and error with modality guidance if any are missing.
+.check_filter_params <- function(flp, fhi, delt) {
+  missing_args <- c(
+    if (is.null(flp))  "flp",
+    if (is.null(fhi))  "fhi",
+    if (is.null(delt)) "delt"
+  )
+  if (length(missing_args) == 0L) return(invisible(NULL))
+
+  stop(
+    "filter = TRUE but the following arguments are not set: ",
+    paste(missing_args, collapse = ", "), ".\n",
+    "Set them explicitly for your recording modality, for example:\n",
+    "  fMRI BOLD  : flp = 0.01, fhi = 0.1,  delt = <TR in seconds>\n",
+    "  EEG alpha  : flp = 8,    fhi = 12,   delt = 1 / <sampling_rate>\n",
+    "  EEG theta  : flp = 4,    fhi = 8,    delt = 1 / <sampling_rate>\n",
+    "  LFP gamma  : flp = 30,   fhi = 80,   delt = 1 / <sampling_rate>\n",
+    "Or pass filter = FALSE if the timeseries is already filtered.",
+    call. = FALSE
+  )
+}
+
 #' LEiDA pipeline
 #'
 #' Convenience wrapper running the full phase-based dynamic FC pipeline:
-#' optional Butterworth bandpass filter → Hilbert transform →
-#' dynamic phase-locking matrices + LEiDA eigenvectors → Kuramoto order
+#' optional Butterworth bandpass filter -> Hilbert transform ->
+#' dynamic phase-locking matrices + LEiDA eigenvectors -> Kuramoto order
 #' parameter. Returns a structured `dynR_leida` object with `print()` and
 #' `plot()` methods.
 #'
-#' @param timeseries Numeric matrix \[N x Tmax\]. BOLD signal with N parcels
-#'   as rows and Tmax timepoints as columns.
-#' @param flp Numeric. Low-pass cutoff frequency (Hz). Default 0.01.
-#' @param fhi Numeric. High-pass cutoff frequency (Hz). Default 0.1.
-#' @param delt Numeric. Sampling interval in seconds (TR). Default 2.
-#' @param order Integer. Butterworth filter order. Default 2.
+#' dynR is modality-agnostic. `flp`, `fhi`, and `delt` have no defaults and
+#' **must** be supplied when `filter = TRUE`. Set them for your recording
+#' modality (see examples). Pass `filter = FALSE` if the timeseries is already
+#' band-limited.
+#'
+#' @param timeseries Numeric matrix \[N x Tmax\]. Rows = channels/parcels,
+#'   columns = timepoints.
+#' @param flp Numeric. Low-pass cutoff frequency (Hz). No default — must be
+#'   set explicitly when `filter = TRUE`.
+#' @param fhi Numeric. High-pass cutoff frequency (Hz). No default — must be
+#'   set explicitly when `filter = TRUE`.
+#' @param delt Numeric. Sampling interval in seconds (`1 / sampling_rate`).
+#'   No default — must be set explicitly when `filter = TRUE`.
+#' @param order Integer. Butterworth filter order. Default `2L`.
 #' @param filter Logical. Apply bandpass filter before phase extraction?
 #'   Default `TRUE`. Set to `FALSE` if the timeseries is already filtered.
 #'
@@ -29,7 +59,7 @@
 #'   \item{synchrony}{Numeric vector \[Tmax-20\]. Kuramoto R(t).}
 #'   \item{metastability}{Numeric. Standard deviation of synchrony.}
 #'   \item{entropy}{Numeric. Shannon entropy of synchrony series (bits).}
-#'   \item{N}{Integer. Number of parcels.}
+#'   \item{N}{Integer. Number of channels/parcels.}
 #'   \item{Tmax}{Integer. Number of timepoints.}
 #'
 #' @seealso `sw_pipeline()`, `dyn_phase_lock()`, `kuramoto()`, `plot.dynR_leida()`
@@ -37,11 +67,24 @@
 #' @examples
 #' set.seed(1)
 #' ts <- matrix(rnorm(10 * 200), nrow = 10)
+#'
+#' # filter = FALSE: timeseries already band-limited
 #' res <- leida_pipeline(ts, filter = FALSE)
 #' res
-leida_pipeline <- function(timeseries, flp = 0.01, fhi = 0.1, delt = 2,
+#'
+#' # fMRI BOLD (TR = 2 s)
+#' \dontrun{
+#' res <- leida_pipeline(ts, flp = 0.01, fhi = 0.1, delt = 2)
+#' }
+#'
+#' # EEG alpha band (250 Hz)
+#' \dontrun{
+#' res <- leida_pipeline(ts, flp = 8, fhi = 12, delt = 1 / 250)
+#' }
+leida_pipeline <- function(timeseries, flp = NULL, fhi = NULL, delt = NULL,
                             order = 2L, filter = TRUE) {
   if (filter) {
+    .check_filter_params(flp, fhi, delt)
     timeseries <- t(apply(timeseries, 1L, bandpass_filter,
                           flp = flp, fhi = fhi, delt = delt, order = order))
   }
@@ -67,15 +110,25 @@ leida_pipeline <- function(timeseries, flp = 0.01, fhi = 0.1, delt = 2,
 #' Sliding-window pipeline
 #'
 #' Convenience wrapper running the full correlation-based dynamic FC pipeline:
-#' optional Butterworth bandpass filter → sliding-window Pearson correlation
-#' matrices → edge-centric cofluctuations. Returns a structured `dynR_sw`
+#' optional Butterworth bandpass filter -> sliding-window Pearson correlation
+#' matrices -> edge-centric cofluctuations. Returns a structured `dynR_sw`
 #' object with `print()` and `plot()` methods.
+#'
+#' dynR is modality-agnostic. `flp`, `fhi`, and `delt` have no defaults and
+#' **must** be supplied when `filter = TRUE`. Pass `filter = FALSE` if the
+#' timeseries is already band-limited.
 #'
 #' @param timeseries Numeric matrix \[N x Tmax\].
 #' @param window Integer. Window size in timepoints.
 #' @param step Integer. Step between window onsets. Default: `window`
 #'   (non-overlapping windows).
-#' @param flp,fhi,delt,order Filter parameters passed to [bandpass_filter()].
+#' @param flp Numeric. Low-pass cutoff (Hz). No default — required when
+#'   `filter = TRUE`.
+#' @param fhi Numeric. High-pass cutoff (Hz). No default — required when
+#'   `filter = TRUE`.
+#' @param delt Numeric. Sampling interval in seconds. No default — required
+#'   when `filter = TRUE`.
+#' @param order Integer. Butterworth filter order. Default `2L`.
 #' @param filter Logical. Apply bandpass filter? Default `TRUE`.
 #'
 #' @return An object of class `dynR_sw` (a named list) with elements:
@@ -85,7 +138,7 @@ leida_pipeline <- function(timeseries, flp = 0.01, fhi = 0.1, delt = 2,
 #'   \item{rss}{Numeric vector \[Tmax\]. Root-sum-square cofluctuation.}
 #'   \item{window}{Integer. Window size used.}
 #'   \item{step}{Integer. Step size used.}
-#'   \item{N}{Integer. Number of parcels.}
+#'   \item{N}{Integer. Number of channels/parcels.}
 #'   \item{Tmax}{Integer. Number of timepoints.}
 #'
 #' @seealso `leida_pipeline()`, `corr_slide()`, `cofluct()`, `plot.dynR_sw()`
@@ -93,12 +146,20 @@ leida_pipeline <- function(timeseries, flp = 0.01, fhi = 0.1, delt = 2,
 #' @examples
 #' set.seed(1)
 #' ts <- matrix(rnorm(10 * 200), nrow = 10)
+#'
+#' # filter = FALSE: timeseries already band-limited
 #' res <- sw_pipeline(ts, window = 20, filter = FALSE)
 #' res
-sw_pipeline <- function(timeseries, window, step = NULL, flp = 0.01, fhi = 0.1,
-                         delt = 2, order = 2L, filter = TRUE) {
+#'
+#' # fMRI BOLD (TR = 2 s)
+#' \dontrun{
+#' res <- sw_pipeline(ts, window = 20, flp = 0.01, fhi = 0.1, delt = 2)
+#' }
+sw_pipeline <- function(timeseries, window, step = NULL, flp = NULL, fhi = NULL,
+                         delt = NULL, order = 2L, filter = TRUE) {
   if (is.null(step)) step <- window
   if (filter) {
+    .check_filter_params(flp, fhi, delt)
     timeseries <- t(apply(timeseries, 1L, bandpass_filter,
                           flp = flp, fhi = fhi, delt = delt, order = order))
   }

@@ -60,10 +60,21 @@ test_that("leida_pipeline: matches individual function outputs", {
   expect_equal(res$metastability, kop$metastability)
 })
 
+test_that("leida_pipeline: errors informatively when filter params missing", {
+  ts <- matrix(rnorm(8 * 80), nrow = 8)
+  expect_error(leida_pipeline(ts, filter = TRUE),           "flp")
+  expect_error(leida_pipeline(ts, flp = 0.01, filter = TRUE), "fhi")
+  expect_error(leida_pipeline(ts, flp = 0.01, fhi = 0.1, filter = TRUE), "delt")
+})
+
 # ── sw_pipeline ───────────────────────────────────────────────────────────────
 
+test_that("sw_pipeline: errors informatively when filter params missing", {
+  ts <- matrix(rnorm(8 * 80), nrow = 8)
+  expect_error(sw_pipeline(ts, window = 20, filter = TRUE), "flp")
+})
+
 test_that("sw_pipeline: returns dynR_sw object with correct structure", {
-  set.seed(6)
   ts  <- matrix(rnorm(10 * 100), nrow = 10)
   res <- sw_pipeline(ts, window = 20, filter = FALSE)
 

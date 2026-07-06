@@ -151,7 +151,8 @@ set.seed(42)
 ts <- matrix(rnorm(80 * 300), nrow = 80)
 
 # Pipeline wrappers — full analysis in one call
-res_leida <- leida_pipeline(ts, flp = 0.01, fhi = 0.1, delt = 2)
+# Supply flp/fhi/delt for your modality; pass filter = FALSE if pre-filtered
+res_leida <- leida_pipeline(ts, flp = 0.01, fhi = 0.1, delt = 2)  # fMRI example
 res_sw    <- sw_pipeline(ts, window = 30, step = 5, flp = 0.01, fhi = 0.1, delt = 2)
 
 # Inspect
