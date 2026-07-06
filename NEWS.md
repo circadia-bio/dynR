@@ -1,5 +1,43 @@
 # NEWS.md
 
+## dynR 0.1.5
+
+### New functions
+
+* `leida_pipeline()` / `sw_pipeline()`: high-level wrappers running the full
+  phase-based or correlation-based pipeline in one call. Both accept an
+  optional `filter` argument to skip bandpass filtering on pre-filtered data.
+  Return S3 objects (`dynR_leida` / `dynR_sw`) with `print()` and `plot()`
+  methods.
+
+* `plot_fc()`: FC matrix heatmap using the circadia diverging palette
+  (deep blue -> antique white -> coral).
+
+* `plot_synchrony()`: Kuramoto R(t) time series with mean reference line.
+
+* `plot_state_sequence()`: brain state tile plot with circadia state colours.
+
+* `plot.dynR_leida()` / `plot.dynR_sw()`: S3 plot methods for pipeline
+  outputs; dispatch to `plot_synchrony()` / `plot_fc()` or the RSS plot
+  via `type = c("synchrony"|"fc")` and `type = c("rss"|"fc")`.
+
+* `batch_leida()` / `batch_sw()`: apply the respective pipeline to multiple
+  subjects at once. Accepts either a named list of [N x Tmax] matrices or a
+  3-D array [N x Tmax x subjects].
+
+* `stack_leida()`: combine LEiDA eigenvector matrices from a batch result into
+  a single data frame or matrix for cross-subject K-means clustering.
+
+* `stack_synchrony()`: combine synchrony time series into a tidy long-format
+  data frame with `subject`, `timepoint`, `synchrony`, and `metastability`
+  columns.
+
+### Dependencies
+
+* `ggplot2` moved from `Suggests` to `Imports` (required by plot functions).
+
+---
+
 ## dynR 0.1.4
 
 ### Performance
