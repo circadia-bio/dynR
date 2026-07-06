@@ -92,7 +92,7 @@ its sum is non-positive, following the LEiDA convention."><meta property="og:ima
 
     <a class="navbar-brand me-2" href="../index.html">dynR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,7 +120,7 @@ its sum is non-positive, following the LEiDA convention."><meta property="og:ima
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Leading eigenvector decomposition (LEiDA)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/v0.1.2/R/leida.R" class="external-link"><code>R/leida.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/main/R/leida.R" class="external-link"><code>R/leida.R</code></a></small>
       <div class="d-none name"><code>get_leida.Rd</code></div>
     </div>
 
@@ -146,8 +146,15 @@ matrices, as returned by <code><a href="dyn_phase_lock.html">dyn_phase_lock()</a
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Numeric matrix [Tmax × N]. Leading eigenvectors, one per
+    <p>Numeric matrix [Tmax x N]. Leading eigenvectors, one per
 timepoint.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The computation is accelerated by a compiled C++ / LAPACK backend
+(<code><a href="get_leida_cpp.html">get_leida_cpp()</a></code>): LAPACK <code>dsyev</code> is called once per timepoint with a
+single shared workspace allocation, and only the leading eigenvector
+(last column of the ascending-order output) is retained.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -156,7 +163,7 @@ relates to spontaneous switching between states of functional connectivity
 during rest. <em>Scientific Reports</em>, 7(1), 5135.
 <a href="https://doi.org/10.1038/s41598-017-05425-7" class="external-link">doi:10.1038/s41598-017-05425-7</a></p>
 <p>Lord, L.-D. et al. (2019). Dynamical exploration of the repertoire of brain
-networks at rest is modulated by psilocybin. <em>NeuroImage</em>, 199, 127–142.
+networks at rest is modulated by psilocybin. <em>NeuroImage</em>, 199, 127-142.
 <a href="https://doi.org/10.1016/j.neuroimage.2019.05.060" class="external-link">doi:10.1016/j.neuroimage.2019.05.060</a></p>
     </div>
 

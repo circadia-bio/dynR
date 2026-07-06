@@ -94,7 +94,7 @@ The first and last 10 timepoints are discarded (matching dyn_phase_lock())."><me
 
     <a class="navbar-brand me-2" href="../index.html">dynR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -122,7 +122,7 @@ The first and last 10 timepoints are discarded (matching dyn_phase_lock())."><me
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Kuramoto order parameter and metastability</h1>
-      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/v0.1.2/R/kuramoto.R" class="external-link"><code>R/kuramoto.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/main/R/kuramoto.R" class="external-link"><code>R/kuramoto.R</code></a></small>
       <div class="d-none name"><code>kuramoto.Rd</code></div>
     </div>
 
@@ -143,7 +143,7 @@ The first and last 10 timepoints are discarded (matching <code><a href="dyn_phas
 
 
 <dl><dt id="arg-phases">phases<a class="anchor" aria-label="anchor" href="#arg-phases"></a></dt>
-<dd><p>Numeric matrix [N × Tmax]. Instantaneous phases in radians,
+<dd><p>Numeric matrix [N x Tmax]. Instantaneous phases in radians,
 as returned by <code><a href="hilbert_phases.html">hilbert_phases()</a></code>.</p></dd>
 
 
@@ -171,6 +171,12 @@ at each (trimmed) timepoint.</p></dd>
 <dd><p>Numeric scalar. Shannon entropy of the synchrony series.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The synchrony time series is computed by a compiled C++ backend
+(<code><a href="kuramoto_sync_cpp.html">kuramoto_sync_cpp()</a></code>) that accumulates cos and sin components directly,
+avoiding R complex-number allocation and <code>vapply</code> dispatch overhead.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

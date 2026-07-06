@@ -16,7 +16,7 @@ kuramoto(phases, base = 2, n_bits = 8L)
 
 - phases:
 
-  Numeric matrix \[N × Tmax\]. Instantaneous phases in radians, as
+  Numeric matrix \[N x Tmax\]. Instantaneous phases in radians, as
   returned by
   [`hilbert_phases()`](https://dynr.circadia-lab.uk/reference/hilbert_phases.md).
 
@@ -45,6 +45,13 @@ A list with:
 - entropy:
 
   Numeric scalar. Shannon entropy of the synchrony series.
+
+## Details
+
+The synchrony time series is computed by a compiled C++ backend
+([`kuramoto_sync_cpp()`](https://dynr.circadia-lab.uk/reference/kuramoto_sync_cpp.md))
+that accumulates cos and sin components directly, avoiding R
+complex-number allocation and `vapply` dispatch overhead.
 
 ## Examples
 

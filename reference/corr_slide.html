@@ -90,7 +90,7 @@ timeseries (Hansen et al., 2015)."><meta property="og:image" content="https://dy
 
     <a class="navbar-brand me-2" href="../index.html">dynR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,7 +118,7 @@ timeseries (Hansen et al., 2015)."><meta property="og:image" content="https://dy
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Sliding window correlation</h1>
-      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/v0.1.2/R/corr_slide.R" class="external-link"><code>R/corr_slide.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/main/R/corr_slide.R" class="external-link"><code>R/corr_slide.R</code></a></small>
       <div class="d-none name"><code>corr_slide.Rd</code></div>
     </div>
 
@@ -137,7 +137,7 @@ timeseries (Hansen et al., 2015).</p>
 
 
 <dl><dt id="arg-timeseries">timeseries<a class="anchor" aria-label="anchor" href="#arg-timeseries"></a></dt>
-<dd><p>Numeric matrix [N × Tmax]. BOLD signal with N parcels
+<dd><p>Numeric matrix [N x Tmax]. BOLD signal with N parcels
 as rows and Tmax timepoints as columns.</p></dd>
 
 
@@ -161,9 +161,17 @@ as rows and Tmax timepoints as columns.</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The correlation matrices are computed by a compiled C++ backend
+(<code><a href="corr_slide_cpp.html">corr_slide_cpp()</a></code>) that calculates Pearson correlation directly on the
+input matrix. No per-window submatrix allocation or transposition is
+performed; the t-outer loop ordering exploits the column-major memory
+layout of the input for sequential cache access.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Hansen, E. C. A. et al. (2015). Functional connectivity dynamics: Modeling
-the switching behavior of the resting state. <em>NeuroImage</em>, 105, 525–535.
+the switching behavior of the resting state. <em>NeuroImage</em>, 105, 525-535.
 <a href="https://doi.org/10.1016/j.neuroimage.2014.11.001" class="external-link">doi:10.1016/j.neuroimage.2014.11.001</a></p>
     </div>
 

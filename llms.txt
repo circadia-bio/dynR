@@ -10,7 +10,7 @@ CHECK](https://github.com/circadia-bio/dynR/actions/workflows/R-CMD-check.yaml/b
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://dynr.circadia-lab.uk/LICENSE)
 [![R](https://img.shields.io/badge/R-%E2%89%A54.1-276DC3.svg)](https://www.r-project.org/)
-[![Version](https://img.shields.io/badge/version-0.1.2-lightgrey)](https://github.com/circadia-bio/dynR)
+[![Version](https://img.shields.io/badge/version-0.1.4-lightgrey)](https://github.com/circadia-bio/dynR)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
@@ -90,6 +90,24 @@ quantification (fractional occupancy, dwell time, Markov transitions).
 | Function | Description |
 |----|----|
 | [`dyn_transitions()`](https://dynr.circadia-lab.uk/reference/dyn_transitions.md) | First-order Markov transition probabilities between brain states |
+
+------------------------------------------------------------------------
+
+## ⚡ Performance
+
+All main compute paths have compiled backends — no Python, no external
+numerical libraries beyond those bundled with R:
+
+| Function | Backend | Notes |
+|----|----|----|
+| [`dyn_phase_lock()`](https://dynr.circadia-lab.uk/reference/dyn_phase_lock.md) | Rcpp C++ | Symmetric `cos(phi_i - phi_j)`; upper triangle only |
+| [`get_leida()`](https://dynr.circadia-lab.uk/reference/get_leida.md) | Rcpp + LAPACK `dsyev` | One shared workspace across timepoints |
+| [`kuramoto()`](https://dynr.circadia-lab.uk/reference/kuramoto.md) | Rcpp C++ | Direct `cos`/`sin` accumulation; no complex alloc |
+| [`hilbert_phases()`](https://dynr.circadia-lab.uk/reference/hilbert_phases.md) | [`mvfft()`](https://rdrr.io/r/stats/fft.html) | Two matrix FFT calls replace N per-parcel loops |
+| [`corr_slide()`](https://dynr.circadia-lab.uk/reference/corr_slide.md) | Rcpp C++ | Direct Pearson; t-outer loop for column-major cache |
+
+All backends include parity tests against their R references
+(bit-perfect or \< 1e-10, depending on the algorithm).
 
 ------------------------------------------------------------------------
 

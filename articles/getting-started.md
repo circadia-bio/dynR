@@ -176,7 +176,7 @@ matrix exactly — a useful first validation for any new dataset.
 full_window <- corr_slide(ts, window = ncol(ts))
 max_diff    <- max(abs(full_window$corr_mats[, , 1] - fc))
 cat("Max deviation from static FC:", formatC(max_diff, format = "e"), "\n")
-#> Max deviation from static FC: 8.8818e-16
+#> Max deviation from static FC: 2.2204e-15
 ```
 
 ------------------------------------------------------------------------

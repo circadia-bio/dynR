@@ -39,12 +39,20 @@ Numeric vector. Zero-phase filtered signal, same length as `x`.
 
 ## Details
 
-[`gsignal::filtfilt()`](https://rdrr.io/pkg/gsignal/man/filtfilt.html)
-uses zero initial conditions, which produces edge transients up to ~0.24
-signal units on real fMRI data. This implementation replicates scipy's
-`lfilter_zi` approach: both the forward and backward passes are
-initialised at steady state scaled by the first sample of each pass,
-reducing edge error to machine precision.
+Two internal code paths are used depending on `order`:
+
+- **`order <= 3`** (typical fMRI use): direct-form b/a coefficients with
+  the companion-matrix initial-condition method. scipy `filtfilt`-parity
+  validated to `< 1e-9` for standard fMRI parameters.
+
+- **`order >= 4`**: second-order sections (SOS). The companion matrix
+  for the full-order b/a representation becomes ill-conditioned for
+  high-order filters with poles close to z = 1 (very low lower cutoff).
+  SOS avoids this by decomposing the filter into biquad sections, each
+  with a 2x2 companion matrix that is always well-conditioned.
+
+Filter coefficients are computed by `.butter_bandpass_zpk()`, a bespoke
+port of `scipy.signal.butter()` that requires no external packages.
 
 ## Examples
 

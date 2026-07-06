@@ -92,7 +92,7 @@ demeaned before transformation."><meta property="og:image" content="https://dynr
 
     <a class="navbar-brand me-2" href="../index.html">dynR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,7 +120,7 @@ demeaned before transformation."><meta property="og:image" content="https://dynr
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Hilbert transform phase extraction</h1>
-      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/v0.1.2/R/hilbert_phases.R" class="external-link"><code>R/hilbert_phases.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/main/R/hilbert_phases.R" class="external-link"><code>R/hilbert_phases.R</code></a></small>
       <div class="d-none name"><code>hilbert_phases.Rd</code></div>
     </div>
 
@@ -140,13 +140,23 @@ demeaned before transformation.</p>
 
 
 <dl><dt id="arg-timeseries">timeseries<a class="anchor" aria-label="anchor" href="#arg-timeseries"></a></dt>
-<dd><p>Numeric matrix [N × Tmax]. BOLD signal with N parcels
+<dd><p>Numeric matrix [N x Tmax]. BOLD signal with N parcels
 as rows and Tmax timepoints as columns.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Numeric matrix [N × Tmax]. Instantaneous phases in radians.</p>
+    <p>Numeric matrix [N x Tmax]. Instantaneous phases in radians.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>All N parcels are processed in two vectorised calls to <code><a href="https://rdrr.io/r/stats/fft.html" class="external-link">mvfft()</a></code> rather
+than an N-iteration R loop over <code><a href="https://rdrr.io/r/stats/fft.html" class="external-link">fft()</a></code>: the timeseries matrix is transposed
+to a Tmax x N layout so <code>mvfft</code> applies the FFT to each parcel column
+simultaneously, the Hilbert multiplier is broadcast across columns, and
+the inverse FFT recovers the analytic signal for all parcels at once.</p>
+<p><code>.hilbert_r()</code> is retained as an internal single-vector reference
+(scipy-parity validated).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

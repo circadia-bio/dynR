@@ -20,7 +20,15 @@ get_leida(sync_conn)
 
 ## Value
 
-Numeric matrix \[Tmax × N\]. Leading eigenvectors, one per timepoint.
+Numeric matrix \[Tmax x N\]. Leading eigenvectors, one per timepoint.
+
+## Details
+
+The computation is accelerated by a compiled C++ / LAPACK backend
+([`get_leida_cpp()`](https://dynr.circadia-lab.uk/reference/get_leida_cpp.md)):
+LAPACK `dsyev` is called once per timepoint with a single shared
+workspace allocation, and only the leading eigenvector (last column of
+the ascending-order output) is retained.
 
 ## References
 
@@ -31,5 +39,5 @@ connectivity during rest. *Scientific Reports*, 7(1), 5135.
 
 Lord, L.-D. et al. (2019). Dynamical exploration of the repertoire of
 brain networks at rest is modulated by psilocybin. *NeuroImage*, 199,
-127–142.
+127-142.
 [doi:10.1016/j.neuroimage.2019.05.060](https://doi.org/10.1016/j.neuroimage.2019.05.060)

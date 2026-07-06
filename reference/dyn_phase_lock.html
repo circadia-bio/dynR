@@ -94,7 +94,7 @@ transform."><meta property="og:image" content="https://dynr.circadia-lab.uk/logo
 
     <a class="navbar-brand me-2" href="../index.html">dynR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -122,7 +122,7 @@ transform."><meta property="og:image" content="https://dynr.circadia-lab.uk/logo
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Dynamic phase-locking matrix (dPL)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/v0.1.2/R/dyn_phase_lock.R" class="external-link"><code>R/dyn_phase_lock.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/main/R/dyn_phase_lock.R" class="external-link"><code>R/dyn_phase_lock.R</code></a></small>
       <div class="d-none name"><code>dyn_phase_lock.Rd</code></div>
     </div>
 
@@ -159,13 +159,20 @@ matrices, one per (trimmed) timepoint.</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The phase-locking computation is accelerated by a compiled C++ backend
+(<code><a href="dyn_phase_lock_cpp.html">dyn_phase_lock_cpp()</a></code>): only the upper triangle is evaluated with
+<code>cos(phi_i - phi_j)</code> and mirrored to the lower, halving trigonometric
+operations relative to a naive double loop.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Cabral, J. et al. (2017). Cognitive performance in healthy older adults
 relates to spontaneous switching between states of functional connectivity
 during rest. <em>Scientific Reports</em>, 7(1), 5135.
 <a href="https://doi.org/10.1038/s41598-017-05425-7" class="external-link">doi:10.1038/s41598-017-05425-7</a></p>
 <p>Lord, L.-D. et al. (2019). Dynamical exploration of the repertoire of brain
-networks at rest is modulated by psilocybin. <em>NeuroImage</em>, 199, 127–142.
+networks at rest is modulated by psilocybin. <em>NeuroImage</em>, 199, 127-142.
 <a href="https://doi.org/10.1016/j.neuroimage.2019.05.060" class="external-link">doi:10.1016/j.neuroimage.2019.05.060</a></p>
     </div>
 

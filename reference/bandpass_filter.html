@@ -94,7 +94,7 @@ padtype = "odd").'><meta property="og:image" content="https://dynr.circadia-lab.
 
     <a class="navbar-brand me-2" href="../index.html">dynR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -122,7 +122,7 @@ padtype = "odd").'><meta property="og:image" content="https://dynr.circadia-lab.
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Butterworth bandpass filter</h1>
-      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/v0.1.2/R/bandpass_filter.R" class="external-link"><code>R/bandpass_filter.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/circadia-bio/dynR/blob/main/R/bandpass_filter.R" class="external-link"><code>R/bandpass_filter.R</code></a></small>
       <div class="d-none name"><code>bandpass_filter.Rd</code></div>
     </div>
 
@@ -168,11 +168,16 @@ using scipy-compatible steady-state initial conditions (equivalent to
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code><a href="https://rdrr.io/pkg/gsignal/man/filtfilt.html" class="external-link">gsignal::filtfilt()</a></code> uses zero initial conditions, which produces edge
-transients up to ~0.24 signal units on real fMRI data. This implementation
-replicates scipy's <code>lfilter_zi</code> approach: both the forward and backward
-passes are initialised at steady state scaled by the first sample of each
-pass, reducing edge error to machine precision.</p>
+    <p>Two internal code paths are used depending on <code>order</code>:</p><ul><li><p><strong><code>order &lt;= 3</code></strong> (typical fMRI use): direct-form b/a coefficients with
+the companion-matrix initial-condition method. scipy <code>filtfilt</code>-parity
+validated to <code>&lt; 1e-9</code> for standard fMRI parameters.</p></li>
+<li><p><strong><code>order &gt;= 4</code></strong>: second-order sections (SOS). The companion matrix for
+the full-order b/a representation becomes ill-conditioned for high-order
+filters with poles close to z = 1 (very low lower cutoff). SOS avoids
+this by decomposing the filter into biquad sections, each with a 2x2
+companion matrix that is always well-conditioned.</p></li>
+</ul><p>Filter coefficients are computed by <code>.butter_bandpass_zpk()</code>, a bespoke
+port of <code>scipy.signal.butter()</code> that requires no external packages.</p>
     </div>
 
     <div class="section level2">

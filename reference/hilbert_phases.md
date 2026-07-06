@@ -14,12 +14,25 @@ hilbert_phases(timeseries)
 
 - timeseries:
 
-  Numeric matrix \[N × Tmax\]. BOLD signal with N parcels as rows and
+  Numeric matrix \[N x Tmax\]. BOLD signal with N parcels as rows and
   Tmax timepoints as columns.
 
 ## Value
 
-Numeric matrix \[N × Tmax\]. Instantaneous phases in radians.
+Numeric matrix \[N x Tmax\]. Instantaneous phases in radians.
+
+## Details
+
+All N parcels are processed in two vectorised calls to
+[`mvfft()`](https://rdrr.io/r/stats/fft.html) rather than an N-iteration
+R loop over [`fft()`](https://rdrr.io/r/stats/fft.html): the timeseries
+matrix is transposed to a Tmax x N layout so `mvfft` applies the FFT to
+each parcel column simultaneously, the Hilbert multiplier is broadcast
+across columns, and the inverse FFT recovers the analytic signal for all
+parcels at once.
+
+`.hilbert_r()` is retained as an internal single-vector reference
+(scipy-parity validated).
 
 ## References
 

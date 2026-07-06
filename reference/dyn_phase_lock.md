@@ -34,6 +34,14 @@ A list with:
   Matrix \[Tmax-20, N\]. Leading eigenvectors from
   [`get_leida()`](https://dynr.circadia-lab.uk/reference/get_leida.md).
 
+## Details
+
+The phase-locking computation is accelerated by a compiled C++ backend
+([`dyn_phase_lock_cpp()`](https://dynr.circadia-lab.uk/reference/dyn_phase_lock_cpp.md)):
+only the upper triangle is evaluated with `cos(phi_i - phi_j)` and
+mirrored to the lower, halving trigonometric operations relative to a
+naive double loop.
+
 ## References
 
 Cabral, J. et al. (2017). Cognitive performance in healthy older adults
@@ -43,7 +51,7 @@ connectivity during rest. *Scientific Reports*, 7(1), 5135.
 
 Lord, L.-D. et al. (2019). Dynamical exploration of the repertoire of
 brain networks at rest is modulated by psilocybin. *NeuroImage*, 199,
-127–142.
+127-142.
 [doi:10.1016/j.neuroimage.2019.05.060](https://doi.org/10.1016/j.neuroimage.2019.05.060)
 
 ## Examples

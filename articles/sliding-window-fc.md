@@ -88,7 +88,7 @@ matrix exactly.
 full     <- corr_slide(ts, window = ncol(ts))
 max_diff <- max(abs(full$corr_mats[, , 1] - fc))
 cat("Max deviation from static FC:", formatC(max_diff, format = "e"), "\n")
-#> Max deviation from static FC: 8.8818e-16
+#> Max deviation from static FC: 2.2204e-15
 ```
 
 ### FC variability across windows
