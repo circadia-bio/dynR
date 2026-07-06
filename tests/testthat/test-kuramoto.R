@@ -41,7 +41,7 @@ test_that("kuramoto: entropy is a finite non-negative scalar", {
 })
 
 test_that("kuramoto: perfectly synchronised signal gives synchrony near 1", {
-  # All parcels with the same sinusoidal signal → Kuramoto R ≈ 1
+  # All parcels with the same sinusoidal signal -> Kuramoto R ~= 1
   t_seq  <- seq(0, 10 * pi, length.out = 300)
   signal <- sin(t_seq)
   ts     <- matrix(rep(signal, 10), nrow = 10, byrow = TRUE)
@@ -49,4 +49,24 @@ test_that("kuramoto: perfectly synchronised signal gives synchrony near 1", {
   res    <- kuramoto(ph)
 
   expect_true(mean(res$synchrony) > 0.99)
+})
+
+test_that("kuramoto_sync_cpp: matches R vapply reference to machine precision", {
+  # Confirms the C++ cos/sin accumulation agrees with R's complex-number
+  # vapply implementation.
+  set.seed(7)
+  N    <- 20L
+  Tmax <- 100L
+  ts   <- matrix(rnorm(N * Tmax), nrow = N)
+  ph   <- hilbert_phases(ts)
+
+  sync_cpp <- kuramoto(ph)$synchrony
+
+  # R reference
+  T_idx    <- seq(11L, Tmax - 10L)
+  sync_ref <- vapply(T_idx, function(t) {
+    Mod(sum(exp(1i * ph[, t])) / N)
+  }, numeric(1))
+
+  expect_equal(sync_cpp, sync_ref, tolerance = 1e-14)
 })

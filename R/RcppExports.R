@@ -45,3 +45,25 @@ get_leida_cpp <- function(sync_conn) {
     .Call(`_dynR_get_leida_cpp`, sync_conn)
 }
 
+#' Kuramoto order parameter time series (C++ backend)
+#'
+#' Internal workhorse called by [kuramoto()]. For each trimmed timepoint,
+#' computes the global Kuramoto order parameter R(t):
+#'
+#' \deqn{R(t) = \frac{1}{N} \left| \sum_{j=1}^{N} e^{i\phi_j(t)} \right|}
+#'
+#' The complex exponential is decomposed as \eqn{\cos\phi + i\sin\phi};
+#' the modulus is \eqn{\sqrt{(\sum\cos)^2 + (\sum\sin)^2} / N}, avoiding
+#' any R complex-number allocation.
+#'
+#' The first and last 10 timepoints are discarded (matching [dyn_phase_lock()]).
+#'
+#' @param phases NumericMatrix \[N x Tmax\]. Instantaneous phases in radians.
+#'
+#' @return NumericVector \[Tmax-20\]. Kuramoto order parameter per timepoint.
+#'
+#' @keywords internal
+kuramoto_sync_cpp <- function(phases) {
+    .Call(`_dynR_kuramoto_sync_cpp`, phases)
+}
+

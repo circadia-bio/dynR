@@ -32,10 +32,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// kuramoto_sync_cpp
+NumericVector kuramoto_sync_cpp(NumericMatrix phases);
+RcppExport SEXP _dynR_kuramoto_sync_cpp(SEXP phasesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type phases(phasesSEXP);
+    rcpp_result_gen = Rcpp::wrap(kuramoto_sync_cpp(phases));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_dynR_dyn_phase_lock_cpp", (DL_FUNC) &_dynR_dyn_phase_lock_cpp, 1},
     {"_dynR_get_leida_cpp", (DL_FUNC) &_dynR_get_leida_cpp, 1},
+    {"_dynR_kuramoto_sync_cpp", (DL_FUNC) &_dynR_kuramoto_sync_cpp, 1},
     {NULL, NULL, 0}
 };
 

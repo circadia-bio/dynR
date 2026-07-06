@@ -5,7 +5,11 @@
 #' synchrony from parcel-level instantaneous phase time series.
 #' The first and last 10 timepoints are discarded (matching [dyn_phase_lock()]).
 #'
-#' @param phases Numeric matrix \[N × Tmax\]. Instantaneous phases in radians,
+#' The synchrony time series is computed by a compiled C++ backend
+#' ([kuramoto_sync_cpp()]) that accumulates cos and sin components directly,
+#' avoiding R complex-number allocation and `vapply` dispatch overhead.
+#'
+#' @param phases Numeric matrix \[N x Tmax\]. Instantaneous phases in radians,
 #'   as returned by [hilbert_phases()].
 #' @param base Numeric. Logarithm base for Shannon entropy. Default is 2.
 #' @param n_bits Integer or `NULL`. Bit depth for discretising the synchrony
@@ -27,13 +31,7 @@
 #' res <- kuramoto(phases)
 #' res$metastability
 kuramoto <- function(phases, base = 2, n_bits = 8L) {
-  N     <- nrow(phases)
-  Tmax  <- ncol(phases)
-  T_idx <- seq(11L, Tmax - 10L)
-  sync  <- vapply(T_idx, function(t) {
-    ku <- sum(exp(1i * phases[, t])) / N
-    Mod(ku)
-  }, numeric(1))
+  sync <- kuramoto_sync_cpp(phases)
   list(
     metastability = sd(sync),
     synchrony     = sync,
