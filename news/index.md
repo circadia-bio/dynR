@@ -130,17 +130,15 @@ C++ acceleration of all main compute paths:
 
 - Removed `gsignal` from `Imports`. Both remaining uses have been ported
   to base-R equivalents:
-  - [`gsignal::butter()`](https://rdrr.io/pkg/gsignal/man/butter.html)
-    replaced by `.butter_bandpass()` — a direct port of
-    `scipy.signal.butter()` (analog Butterworth LP prototype -\>
+  - `gsignal::butter()` replaced by `.butter_bandpass()` — a direct port
+    of `scipy.signal.butter()` (analog Butterworth LP prototype -\>
     LP-to-BP transformation -\> bilinear transform -\> ZPK-to-TF).
     Coefficients validated against the `[k, 0, -2k, 0, k]` bandpass
     structure and existing scipy parity tests.
-  - [`gsignal::hilbert()`](https://rdrr.io/pkg/gsignal/man/hilbert.html)
-    replaced by `.hilbert_r()` — FFT-based analytic signal using base-R
-    [`fft()`](https://rdrr.io/r/stats/fft.html), equivalent to
-    `scipy.signal.hilbert()`. Phase range confirmed `[-pi, pi]` on
-    synthetic cosine.
+  - `gsignal::hilbert()` replaced by `.hilbert_r()` — FFT-based analytic
+    signal using base-R [`fft()`](https://rdrr.io/r/stats/fft.html),
+    equivalent to `scipy.signal.hilbert()`. Phase range confirmed
+    `[-pi, pi]` on synthetic cosine.
 
 ------------------------------------------------------------------------
 
@@ -169,13 +167,12 @@ C++ acceleration of all main compute paths:
 ### Bug fixes
 
 - [`bandpass_filter()`](https://dynr.circadia-lab.uk/reference/bandpass_filter.md):
-  replaced
-  [`gsignal::filtfilt()`](https://rdrr.io/pkg/gsignal/man/filtfilt.html)
-  (zero initial conditions) with a scipy-compatible implementation that
-  achieves bit-perfect parity with `scipy.signal.filtfilt` and
-  `scipy.signal.sosfiltfilt` (max \|diff\| \< 4e-12). The old
-  implementation produced edge transients of up to ~0.24 signal units on
-  real fMRI data due to zero initial state; this propagated into
+  replaced `gsignal::filtfilt()` (zero initial conditions) with a
+  scipy-compatible implementation that achieves bit-perfect parity with
+  `scipy.signal.filtfilt` and `scipy.signal.sosfiltfilt` (max \|diff\|
+  \< 4e-12). The old implementation produced edge transients of up to
+  ~0.24 signal units on real fMRI data due to zero initial state; this
+  propagated into
   [`hilbert_phases()`](https://dynr.circadia-lab.uk/reference/hilbert_phases.md)
   and
   [`dyn_phase_lock()`](https://dynr.circadia-lab.uk/reference/dyn_phase_lock.md),
