@@ -29,6 +29,9 @@ template:
 
   includes:
     in_header: |
+      <!-- Fathom - beautiful, simple website analytics -->
+      <script src="https://cdn.usefathom.com/script.js" data-site="NKUSHGRU" defer></script>
+      <!-- / Fathom -->
       <style>
         /* ── Navbar ── */
         .navbar {
