@@ -226,16 +226,16 @@ package.
 
 ## 🤝 Related tools
 
-**Circadia Lab ecosystem:** - 🕐
+**Circadia Lab ecosystem:** - ⌚️
 [**zeitR**](https://github.com/circadia-bio/zeitR) — wrist actigraphy
-analysis - 😴 [**hypnoR**](https://github.com/circadia-bio/hypnoR) —
-hypnogram handling and sleep architecture - 🔗
+analysis - 😵‍💫 [**hypnoR**](https://github.com/circadia-bio/hypnoR) —
+hypnogram handling and sleep architecture - 🔄
 [**syncR**](https://github.com/circadia-bio/syncR) — ecosystem
 integrator
 
-**CoDe-Neuro ecosystem:** - 🧪
+**CoDe-Neuro ecosystem:** - 🧠
 [**stateR**](https://github.com/CoDe-Neuro/stateR) — brain state metrics
-(FO, dwell time, Markov) — consumes `dynR` output - 🔬
+(FO, dwell time, Markov) — consumes `dynR` output - 🧪
 [**ptestR**](https://github.com/CoDe-Neuro/ptestR) — permutation-based
 significance testing
 
