@@ -1,0 +1,39 @@
+{
+  "title": "dynR: Dynamic Connectivity Analysis for Neurophysiological Timeseries",
+  "description": "An R port of the Python dynfc library for computing dynamic connectivity (dynFC) representations from multivariate neurophysiological timeseries, including BOLD fMRI, EEG, LFP, and related signals. Implements sliding-window Pearson correlation, edge-centric cofluctuation analysis, instantaneous phase-locking via the Hilbert transform, dynamic phase-locking matrices (dPL), the LEiDA leading-eigenvector framework, and the Kuramoto order parameter with metastability and Shannon entropy. Part of the Circadia Lab R ecosystem.",
+  "creators": [
+    {
+      "name": "França, Lucas",
+      "affiliation": "Northumbria University",
+      "orcid": "0000-0003-0853-1319"
+    },
+    {
+      "name": "Leocadio-Miguel, Mario",
+      "affiliation": "Northumbria University",
+      "orcid": "0000-0002-7248-3529"
+    },
+    {
+      "name": "Batallé, Dafnis",
+      "affiliation": "King's College London",
+      "orcid": "0000-0003-2097-979X"
+    }
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open",
+  "keywords": [
+    "dynamic connectivity",
+    "neuroimaging",
+    "EEG",
+    "fMRI",
+    "R package",
+    "Circadia Lab"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/circadia-bio/dynR",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    }
+  ]
+}
