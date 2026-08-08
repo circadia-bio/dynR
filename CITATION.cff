@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "dynR: Dynamic Connectivity Analysis for Neurophysiological Timeseries"
+type: software
+version: 0.1.5
+authors:
+  - family-names: "França"
+    given-names: "Lucas"
+    orcid: "https://orcid.org/0000-0003-0853-1319"
+    affiliation: "Northumbria University"
+  - family-names: "Leocadio-Miguel"
+    given-names: "Mario"
+    orcid: "https://orcid.org/0000-0002-7248-3529"
+    affiliation: "Northumbria University"
+  - family-names: "Batallé"
+    given-names: "Dafnis"
+    orcid: "https://orcid.org/0000-0003-2097-979X"
+    affiliation: "King's College London"
+license: MIT
+repository-code: "https://github.com/circadia-bio/dynR"
+url: "https://dynr.circadia-lab.uk"
+keywords:
+  - dynamic connectivity
+  - neuroimaging
+  - EEG
+  - fMRI
+  - R package
+  - Circadia Lab
